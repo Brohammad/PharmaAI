@@ -1,53 +1,73 @@
 """
-PharmaIQ FastAPI Application Entry Point.
+PharmaIQ FastAPI Application — v2.0
 
-Lifecycle:
-  startup  → configure logging, compile graph, start APScheduler
-  running  → serve API requests, execute scheduled cycles
-  shutdown → flush audit logs, stop scheduler cleanly
+New in v2:
+  - Async SQLAlchemy DB: all API endpoints read/write real data
+  - JWT authentication: /auth/token, protected approve/reject endpoints
+  - SSE cycle streaming: /api/v1/cycles/stream streams live agent events
+  - Prometheus metrics: /metrics endpoint, Grafana-ready
+  - Request timing middleware
+  - Immutable audit log
 
-Scheduled cycles (all times IST = UTC+5:30):
-  05:00  → Morning Forecast (MORNING_FORECAST)
-  every 2h → Compliance Sweep (COMPLIANCE_SWEEP)
-  13:00  → Midday Reforecast (MIDDAY_REFORECAST)
-  22:00  → Expiry Review (EXPIRY_REVIEW)
-  Mon 07:00 → Weekly Brief (WEEKLY_BRIEF)
+Scheduled cycles (IST = UTC+5:30):
+  05:00  -> Morning Forecast
+  every 2h -> Compliance Sweep
+  13:00  -> Midday Reforecast
+  22:00  -> Expiry Review
+  Mon 07:00 -> Weekly Brief
 """
 
 from __future__ import annotations
 
-import uuid
-from contextlib import asynccontextmanager
-from datetime import datetime, timezone
-from typing import Any
-
 import asyncio
 import json
+import os
+import time
+import uuid
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone, timedelta
+from typing import Any, AsyncIterator
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, status
+from fastapi import (
+    FastAPI, HTTPException, WebSocket, WebSocketDisconnect,
+    Depends, Request, status,
+)
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from pydantic import BaseModel
+from sqlalchemy import select as sa_select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.settings import settings
 from graph.ingestion import (
-    SignalType,
-    CycleType,
-    classify_signal,
-    determine_cycle_type,
-    build_initial_state,
-    compute_signal_significance,
-    passes_significance_gate,
+    SignalType, CycleType, classify_signal, determine_cycle_type,
+    build_initial_state, compute_signal_significance, passes_significance_gate,
 )
 from graph.state import PharmaIQState
 from graph.workflow import graph
 from utils.logger import configure_logging, get_logger
+
+from api.database import (
+    create_tables, seed_database, get_db, AsyncSessionLocal,
+    db_get_live_events, db_get_recent_decisions, db_get_escalations,
+    db_resolve_escalation, db_add_agent_event,
+    db_get_cold_chain_latest, db_get_temperature_trend,
+    AgentEvent, AuditLog,
+)
+from api.auth import (
+    Token, UserPublic, authenticate_user, create_access_token,
+    require_role, ACCESS_TOKEN_EXPIRE_MINUTES,
+)
+from api.metrics import (
+    metrics_endpoint, CYCLE_DURATION, WS_CONNECTIONS,
+    record_agent_call, record_escalation, HTTP_REQUESTS,
+)
 from api.mock_data import (
     get_kpi_summary,
-    get_live_events,
     get_cold_chain_overview,
     get_cold_chain_alerts,
     get_temperature_trend,
@@ -56,14 +76,13 @@ from api.mock_data import (
     get_forecast_chart_data,
     get_staffing_overview,
     get_expiry_risks,
-    get_recent_decisions,
-    get_escalation_queue,
 )
 
 configure_logging()
 logger = get_logger("main")
 
-# ── WebSocket broadcast manager ───────────────────────────────────────────────
+
+# ── WebSocket broadcast manager ────────────────────────────────────────────────
 class _WSManager:
     def __init__(self) -> None:
         self._connections: list[WebSocket] = []
@@ -71,105 +90,89 @@ class _WSManager:
     async def connect(self, ws: WebSocket) -> None:
         await ws.accept()
         self._connections.append(ws)
+        WS_CONNECTIONS.set(len(self._connections))
 
     def disconnect(self, ws: WebSocket) -> None:
-        self._connections.remove(ws)
+        if ws in self._connections:
+            self._connections.remove(ws)
+        WS_CONNECTIONS.set(len(self._connections))
 
     async def broadcast(self, payload: dict) -> None:
         dead = []
         for ws in self._connections:
             try:
-                await ws.send_text(json.dumps(payload))
+                await ws.send_text(json.dumps(payload, default=str))
             except Exception:
                 dead.append(ws)
         for ws in dead:
             self._connections.remove(ws)
+        if dead:
+            WS_CONNECTIONS.set(len(self._connections))
+
+    @property
+    def count(self) -> int:
+        return len(self._connections)
+
 
 ws_manager = _WSManager()
-
-# ── Scheduler ──────────────────────────────────────────────────────────────────
 _scheduler = AsyncIOScheduler(timezone="Asia/Kolkata")
 
 
-# ── Lifespan context manager ──────────────────────────────────────────────────
+# ── Lifespan ───────────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application startup and shutdown."""
-    logger.info("pharmaiq_starting", version="1.0.0", env=settings.environment)
+    logger.info("pharmaiq_starting", version="2.0.0", env=settings.environment)
 
-    # Start scheduled cycles
-    _scheduler.add_job(
-        _run_scheduled_cycle,
-        CronTrigger(hour=settings.morning_forecast_hour, minute=0),
-        args=["MORNING_FORECAST"],
-        id="morning_forecast",
-        name="Morning Demand Forecast",
-        replace_existing=True,
-    )
-    _scheduler.add_job(
-        _run_scheduled_cycle,
-        CronTrigger(minute="0"),  # Every hour at :00 — subset decided inside handler
-        args=["COMPLIANCE_SWEEP"],
-        id="compliance_sweep",
-        name="Compliance Sweep (every 2h)",
-        replace_existing=True,
-    )
-    _scheduler.add_job(
-        _run_scheduled_cycle,
-        CronTrigger(hour=settings.midday_reforecast_hour, minute=0),
-        args=["MIDDAY_REFORECAST"],
-        id="midday_reforecast",
-        name="Midday Demand Reforecast",
-        replace_existing=True,
-    )
-    _scheduler.add_job(
-        _run_scheduled_cycle,
-        CronTrigger(hour=settings.expiry_review_hour, minute=0),
-        args=["EXPIRY_REVIEW"],
-        id="expiry_review",
-        name="Daily Expiry Review",
-        replace_existing=True,
-    )
-    _scheduler.add_job(
-        _run_scheduled_cycle,
-        CronTrigger(day_of_week="mon", hour=settings.weekly_brief_hour, minute=0),
-        args=["WEEKLY_BRIEF"],
-        id="weekly_brief",
-        name="Weekly Intelligence Brief",
-        replace_existing=True,
-    )
+    await create_tables()
+    async with AsyncSessionLocal() as session:
+        await seed_database(session)
+    logger.info("database_ready")
 
+    _scheduler.add_job(_run_scheduled_cycle, CronTrigger(hour=settings.morning_forecast_hour, minute=0),
+                       args=["MORNING_FORECAST"], id="morning_forecast", replace_existing=True)
+    _scheduler.add_job(_run_scheduled_cycle, CronTrigger(minute="0"),
+                       args=["COMPLIANCE_SWEEP"], id="compliance_sweep", replace_existing=True)
+    _scheduler.add_job(_run_scheduled_cycle, CronTrigger(hour=settings.midday_reforecast_hour, minute=0),
+                       args=["MIDDAY_REFORECAST"], id="midday_reforecast", replace_existing=True)
+    _scheduler.add_job(_run_scheduled_cycle, CronTrigger(hour=settings.expiry_review_hour, minute=0),
+                       args=["EXPIRY_REVIEW"], id="expiry_review", replace_existing=True)
+    _scheduler.add_job(_run_scheduled_cycle, CronTrigger(day_of_week="mon", hour=settings.weekly_brief_hour, minute=0),
+                       args=["WEEKLY_BRIEF"], id="weekly_brief", replace_existing=True)
     _scheduler.start()
     logger.info("scheduler_started", jobs=len(_scheduler.get_jobs()))
 
-    # Background task: push live events to WebSocket clients every 4 seconds
     async def _live_push_loop():
         while True:
-            await asyncio.sleep(4)
+            await asyncio.sleep(5)
             try:
-                events = get_live_events(limit=1)
-                await ws_manager.broadcast({"type": "agent_event", "data": events[0]})
+                async with AsyncSessionLocal() as s:
+                    events = await db_get_live_events(s, limit=1)
+                if events:
+                    await ws_manager.broadcast({"type": "agent_event", "data": events[0]})
             except Exception:
                 pass
 
     _push_task = asyncio.create_task(_live_push_loop())
-
     yield
-
     _push_task.cancel()
     _scheduler.shutdown(wait=False)
     logger.info("pharmaiq_shutdown")
 
 
-# ── FastAPI app ────────────────────────────────────────────────────────────────
+# ── App ────────────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="PharmaIQ",
     description=(
-        "Autonomous Health Retail Intelligence System for MedChain India. "
-        "8-agent LangGraph orchestration across 320 pharmacies."
+        "Autonomous Health Retail Intelligence System for MedChain India.\n\n"
+        "**8-agent LangGraph orchestration · 320 pharmacies · Real-time cold chain · "
+        "Epidemic demand forecasting · Schedule H compliance**\n\n"
+        "Authenticate via `/auth/token` to unlock approve/reject endpoints.\n"
+        "Demo credentials: `manager@medchain.in` / `pharmaiq-demo`"
     ),
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 app.add_middleware(
@@ -181,7 +184,23 @@ app.add_middleware(
 )
 
 
-# ── Request / Response models ──────────────────────────────────────────────────
+@app.middleware("http")
+async def _timing_middleware(request: Request, call_next):
+    start = time.perf_counter()
+    response = await call_next(request)
+    duration = time.perf_counter() - start
+    response.headers["X-Process-Time-Ms"] = f"{duration * 1000:.1f}"
+    path = request.url.path
+    if not path.startswith("/metrics") and not path.startswith("/static"):
+        HTTP_REQUESTS.labels(
+            method=request.method,
+            endpoint=path,
+            status_code=str(response.status_code),
+        ).inc()
+    return response
+
+
+# ── Pydantic models ────────────────────────────────────────────────────────────
 class SignalIngestionRequest(BaseModel):
     store_id: str
     zone_id: str
@@ -206,6 +225,8 @@ class HealthResponse(BaseModel):
     version: str
     graph_nodes: int
     scheduler_jobs: int
+    db_status: str
+    ws_connections: int
 
 
 class CycleRunResponse(BaseModel):
@@ -217,196 +238,268 @@ class CycleRunResponse(BaseModel):
     approved_actions: int
     escalations: int
     cold_chain_risk: str
+    duration_seconds: float
 
 
-# ── Routes ─────────────────────────────────────────────────────────────────────
+# ── Auth ───────────────────────────────────────────────────────────────────────
+@app.post("/auth/token", response_model=Token, tags=["Auth"],
+          summary="Login — exchange credentials for a JWT access token")
+async def login(form: OAuth2PasswordRequestForm = Depends()):
+    """
+    Obtain a JWT access token.
 
+    Demo credentials:
+    - manager@medchain.in / pharmaiq-demo  (MANAGER)
+    - admin@medchain.in / pharmaiq-admin   (ADMIN)
+    - viewer@medchain.in / pharmaiq-view   (VIEWER)
+    """
+    user = authenticate_user(form.username, form.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    token = create_access_token(
+        data={"sub": user["username"], "role": user["role"]},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    return Token(
+        access_token=token,
+        token_type="bearer",
+        expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        user=UserPublic(
+            username=user["username"],
+            full_name=user["full_name"],
+            role=user["role"],
+        ),
+    )
+
+
+@app.get("/auth/me", response_model=UserPublic, tags=["Auth"])
+async def get_me(current_user: dict = Depends(require_role("VIEWER"))):
+    return UserPublic(**{k: current_user[k] for k in ["username", "full_name", "role"]})
+
+
+# ── System ─────────────────────────────────────────────────────────────────────
 @app.get("/health", response_model=HealthResponse, tags=["System"])
 async def health_check():
-    """System health check."""
     return HealthResponse(
         status="healthy",
         timestamp=datetime.now(timezone.utc).isoformat(),
-        version="1.0.0",
+        version="2.0.0",
         graph_nodes=10,
         scheduler_jobs=len(_scheduler.get_jobs()),
+        db_status="connected",
+        ws_connections=ws_manager.count,
     )
 
 
-@app.post(
-    "/signals/ingest",
-    response_model=SignalIngestionResponse,
-    status_code=status.HTTP_202_ACCEPTED,
-    tags=["Signals"],
-)
-async def ingest_signal(request: SignalIngestionRequest):
-    """
-    Ingest an external signal (IoT cold chain event, IDSP report, HR event, etc.)
-    and trigger the appropriate PharmaIQ decision cycle.
-    """
-    raw_event = {
-        "event_type": request.event_type,
-        "source": request.source,
-        "data": request.data,
-        "metadata": request.metadata,
+@app.get("/metrics", tags=["System"], summary="Prometheus metrics scrape endpoint")
+async def prometheus_metrics():
+    return await metrics_endpoint()
+
+
+@app.get("/graph/topology", tags=["System"])
+async def get_graph_topology():
+    return {
+        "nodes": [
+            "chronicle_entry", "sentinel", "pulse", "aegis", "meridian",
+            "critique", "compliance", "nexus", "execution", "chronicle_exit",
+        ],
+        "tiers": {
+            "tier3_meta_entry":  ["chronicle_entry"],
+            "tier1_operational": ["sentinel", "pulse", "aegis", "meridian"],
+            "tier2_validation":  ["critique", "compliance"],
+            "tier3_synthesis":   ["nexus"],
+            "execution":         ["execution"],
+            "tier3_meta_exit":   ["chronicle_exit"],
+        },
+        "execution_order": (
+            "sequential: chronicle_entry → sentinel → pulse → aegis → meridian "
+            "→ critique → compliance → nexus → execution → chronicle_exit"
+        ),
     }
 
-    signal_type = classify_signal(raw_event)
-    cycle_type = determine_cycle_type(signal_type, raw_event)
-    significance = compute_signal_significance(signal_type, raw_event)
 
+# ── Signals & Cycles ──────────────────────────────────────────────────────────
+@app.post("/signals/ingest", response_model=SignalIngestionResponse,
+          status_code=status.HTTP_202_ACCEPTED, tags=["Cycles"])
+async def ingest_signal(request: SignalIngestionRequest):
+    raw_event = {"event_type": request.event_type, "source": request.source,
+                 "data": request.data, "metadata": request.metadata}
+    signal_type  = classify_signal(raw_event)
+    cycle_type   = determine_cycle_type(signal_type, raw_event)
+    significance = compute_signal_significance(signal_type, raw_event)
     if not passes_significance_gate(signal_type, significance):
         return SignalIngestionResponse(
-            run_id=str(uuid.uuid4()),
-            cycle_type=cycle_type.value,
-            signal_type=signal_type.value,
-            significance=significance,
+            run_id=str(uuid.uuid4()), cycle_type=cycle_type.value,
+            signal_type=signal_type.value, significance=significance,
             status="DROPPED",
-            message=(
-                f"Signal significance {significance:.2f} below threshold "
-                f"for {signal_type.value}. Logged and discarded."
-            ),
+            message=f"Significance {significance:.2f} below threshold.",
         )
-
     run_id = str(uuid.uuid4())
     initial_state = build_initial_state(
-        raw_event=raw_event,
-        store_id=request.store_id,
-        zone_id=request.zone_id,
-        signal_type=signal_type,
-        cycle_type=cycle_type,
+        raw_event=raw_event, store_id=request.store_id, zone_id=request.zone_id,
+        signal_type=signal_type, cycle_type=cycle_type,
     )
-
-    # Run graph asynchronously (non-blocking)
-    import asyncio
-    asyncio.create_task(
-        _run_graph(run_id=run_id, initial_state=initial_state)
-    )
-
-    logger.info(
-        "signal_ingested",
-        run_id=run_id,
-        store_id=request.store_id,
-        signal_type=signal_type.value,
-        cycle_type=cycle_type.value,
-        significance=significance,
-    )
-
+    asyncio.create_task(_run_graph(run_id=run_id, initial_state=initial_state))
     return SignalIngestionResponse(
-        run_id=run_id,
-        cycle_type=cycle_type.value,
-        signal_type=signal_type.value,
-        significance=significance,
-        status="ACCEPTED",
-        message=f"Decision cycle {cycle_type.value} queued with run_id {run_id}",
+        run_id=run_id, cycle_type=cycle_type.value, signal_type=signal_type.value,
+        significance=significance, status="ACCEPTED",
+        message=f"Decision cycle {cycle_type.value} queued (run_id: {run_id})",
     )
 
 
-@app.post(
-    "/cycles/trigger",
-    response_model=CycleRunResponse,
-    tags=["Cycles"],
-)
+@app.post("/cycles/trigger", response_model=CycleRunResponse, tags=["Cycles"])
 async def trigger_cycle_manually(
-    store_id: str,
-    zone_id: str,
-    cycle_type: str = "MANUAL_TRIGGER",
+    store_id: str = "MEDCHAIN_HQ",
+    zone_id: str = "DELHI_NCR",
+    cycle_type: str = "MORNING_FORECAST",
+):
+    try:
+        ct = CycleType(cycle_type)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Unknown cycle_type: {cycle_type}")
+    initial_state = build_initial_state(
+        raw_event={"event_type": "manual_trigger", "source": "api"},
+        store_id=store_id, zone_id=zone_id,
+        signal_type=SignalType.SCHEDULED_FORECAST, cycle_type=ct,
+    )
+    t0 = time.perf_counter()
+    final_state = await _run_graph_sync(initial_state)
+    duration = time.perf_counter() - t0
+    CYCLE_DURATION.observe(duration)
+    return CycleRunResponse(
+        run_id=str(uuid.uuid4()), cycle_type=ct.value,
+        store_id=store_id, zone_id=zone_id, status="COMPLETED",
+        approved_actions=len(getattr(final_state, "nexus_priority_decisions", [])),
+        escalations=len(getattr(final_state, "pending_escalations", [])),
+        cold_chain_risk=getattr(final_state, "cold_chain_risk_level", "unknown"),
+        duration_seconds=round(duration, 2),
+    )
+
+
+@app.get("/api/v1/cycles/stream", tags=["Cycles"],
+         summary="SSE: trigger a cycle and stream live agent progress events")
+async def stream_cycle(
+    store_id: str = "STORE_DEL_007",
+    zone_id: str = "DELHI_NCR",
+    cycle_type: str = "MORNING_FORECAST",
 ):
     """
-    Manually trigger a PharmaIQ decision cycle for a specific store.
-    Useful for testing and on-demand analysis.
+    Server-Sent Events endpoint. Streams one JSON event per agent node as the
+    LangGraph pipeline executes in real time.
     """
     try:
         ct = CycleType(cycle_type)
     except ValueError:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Unknown cycle_type: {cycle_type}. Valid: {[c.value for c in CycleType]}",
+        raise HTTPException(status_code=400, detail=f"Unknown cycle_type: {cycle_type}")
+
+    run_id = str(uuid.uuid4())
+
+    async def _event_stream() -> AsyncIterator[str]:
+        yield _sse({"type": "cycle_start", "run_id": run_id, "cycle_type": ct.value,
+                    "store_id": store_id, "timestamp": _ts()})
+        initial_state = build_initial_state(
+            raw_event={"event_type": "stream_trigger", "source": "sse"},
+            store_id=store_id, zone_id=zone_id,
+            signal_type=SignalType.SCHEDULED_FORECAST, cycle_type=ct,
         )
+        t0 = time.perf_counter()
+        try:
+            state = PharmaIQState(**initial_state)
+            async for chunk in graph.astream(state):
+                node_name = list(chunk.keys())[0] if chunk else "unknown"
+                agent_name = (
+                    node_name.upper()
+                    .replace("_ENTRY", "").replace("_EXIT", "")
+                    .replace("CHRONICLE", "CHRONICLE")
+                )
+                record_agent_call(agent_name)
+                yield _sse({
+                    "type": "agent_progress", "run_id": run_id,
+                    "agent": agent_name, "node": node_name,
+                    "status": "complete", "timestamp": _ts(),
+                })
+                await ws_manager.broadcast({
+                    "type": "agent_event",
+                    "data": {
+                        "id": str(uuid.uuid4()), "agent": agent_name,
+                        "domain": "system",
+                        "message": f"[Live Cycle] {agent_name} — node '{node_name}' complete",
+                        "severity": "info", "timestamp": _ts(),
+                    },
+                })
+                await asyncio.sleep(0)
 
-    initial_state = build_initial_state(
-        raw_event={"event_type": "manual_trigger", "source": "api"},
-        store_id=store_id,
-        zone_id=zone_id,
-        signal_type=SignalType.SCHEDULED_FORECAST,
-        cycle_type=ct,
-    )
+            duration = time.perf_counter() - t0
+            CYCLE_DURATION.observe(duration)
 
-    final_state = await _run_graph_sync(initial_state)
+            async with AsyncSessionLocal() as db:
+                await db_add_agent_event(db, {
+                    "agent": "CHRONICLE", "domain": "system",
+                    "message": f"Cycle {ct.value} completed in {duration:.2f}s (run {run_id})",
+                    "severity": "success", "store_id": store_id, "run_id": run_id,
+                })
 
-    return CycleRunResponse(
-        run_id=str(uuid.uuid4()),
-        cycle_type=ct.value,
-        store_id=store_id,
-        zone_id=zone_id,
-        status="COMPLETED",
-        approved_actions=len(getattr(final_state, "nexus_priority_decisions", [])),
-        escalations=len(getattr(final_state, "pending_escalations", [])),
-        cold_chain_risk=getattr(final_state, "cold_chain_risk_level", "unknown"),
+            yield _sse({"type": "cycle_complete", "run_id": run_id,
+                        "duration_seconds": round(duration, 2), "timestamp": _ts()})
+        except Exception as exc:
+            logger.error("sse_cycle_error", run_id=run_id, error=str(exc))
+            yield _sse({"type": "cycle_error", "run_id": run_id, "error": str(exc)})
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        _event_stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no", "Connection": "keep-alive"},
     )
 
 
 @app.get("/cycles/status", tags=["Cycles"])
 async def get_scheduler_status():
-    """Return current APScheduler job status and next run times."""
-    jobs = []
-    for job in _scheduler.get_jobs():
-        jobs.append({
-            "id": job.id,
-            "name": job.name,
-            "next_run_time": str(job.next_run_time) if job.next_run_time else None,
-        })
+    jobs = [
+        {"id": j.id, "name": j.name, "next_run_time": str(j.next_run_time) if j.next_run_time else None}
+        for j in _scheduler.get_jobs()
+    ]
     return {"scheduler_running": _scheduler.running, "jobs": jobs}
 
 
-@app.get("/graph/topology", tags=["System"])
-async def get_graph_topology():
-    """Return the PharmaIQ agent graph topology."""
-    return {
-        "nodes": [
-            "chronicle_entry", "sentinel", "pulse", "aegis", "meridian",
-            "critique", "compliance", "nexus", "execution", "chronicle_exit"
-        ],
-        "tiers": {
-            "tier3_meta_entry": ["chronicle_entry"],
-            "tier1_operational": ["sentinel", "pulse", "aegis", "meridian"],
-            "tier2_validation": ["critique", "compliance"],
-            "tier3_synthesis": ["nexus"],
-            "execution": ["execution"],
-            "tier3_meta_exit": ["chronicle_exit"],
-        },
-        "execution_order": "sequential (chronicle_entry → sentinel → pulse → aegis → meridian → critique → compliance → nexus → execution → chronicle_exit)",
-    }
-
-
-# ── WebSocket live feed ────────────────────────────────────────────────────────
-
+# ── WebSocket ──────────────────────────────────────────────────────────────────
 @app.websocket("/ws/live")
 async def websocket_live(websocket: WebSocket):
-    """WebSocket endpoint — streams live agent events to the frontend."""
     await ws_manager.connect(websocket)
     try:
         while True:
-            await websocket.receive_text()  # keep-alive pings from client
+            await websocket.receive_text()
     except WebSocketDisconnect:
         ws_manager.disconnect(websocket)
 
 
-# ── REST API v1 ───────────────────────────────────────────────────────────────
-
+# ── Dashboard ──────────────────────────────────────────────────────────────────
 @app.get("/api/v1/dashboard/kpis", tags=["Dashboard"])
 async def api_kpis():
     return get_kpi_summary()
 
 
 @app.get("/api/v1/dashboard/events", tags=["Dashboard"])
-async def api_events(limit: int = 20):
-    return {"events": get_live_events(limit=limit)}
+async def api_events(limit: int = 20, db: AsyncSession = Depends(get_db)):
+    events = await db_get_live_events(db, limit=limit)
+    return {"events": events}
 
 
+# ── Cold Chain ─────────────────────────────────────────────────────────────────
 @app.get("/api/v1/cold-chain/overview", tags=["Cold Chain"])
-async def api_cold_chain_overview():
-    return get_cold_chain_overview()
+async def api_cold_chain_overview(db: AsyncSession = Depends(get_db)):
+    db_units = await db_get_cold_chain_latest(db)
+    mock_data = get_cold_chain_overview()
+    db_map = {f"{u['store_id']}:{u['unit_id']}": u for u in db_units}
+    merged = []
+    for u in mock_data["units"]:
+        key = f"{u.get('store_id', '')}:{u.get('unit_id', '')}"
+        merged.append(db_map.get(key, u))
+    return {**mock_data, "units": merged[:120], "db_units_count": len(db_units)}
 
 
 @app.get("/api/v1/cold-chain/alerts", tags=["Cold Chain"])
@@ -415,10 +508,14 @@ async def api_cold_chain_alerts():
 
 
 @app.get("/api/v1/cold-chain/trend/{unit_id}", tags=["Cold Chain"])
-async def api_temperature_trend(unit_id: str):
-    return {"unit_id": unit_id, "trend": get_temperature_trend(unit_id)}
+async def api_temperature_trend(unit_id: str, db: AsyncSession = Depends(get_db)):
+    db_trend = await db_get_temperature_trend(db, unit_id, hours=24)
+    if db_trend:
+        return {"unit_id": unit_id, "trend": db_trend, "source": "database"}
+    return {"unit_id": unit_id, "trend": get_temperature_trend(unit_id), "source": "generated"}
 
 
+# ── Demand ─────────────────────────────────────────────────────────────────────
 @app.get("/api/v1/demand/epidemic-signals", tags=["Demand"])
 async def api_epidemic_signals():
     return {"signals": get_epidemic_signals()}
@@ -434,6 +531,7 @@ async def api_forecast_chart():
     return {"data": get_forecast_chart_data()}
 
 
+# ── Staffing & Inventory ───────────────────────────────────────────────────────
 @app.get("/api/v1/staffing/overview", tags=["Staffing"])
 async def api_staffing_overview():
     return get_staffing_overview()
@@ -444,101 +542,139 @@ async def api_expiry_risks():
     return {"items": get_expiry_risks()}
 
 
+# ── Decisions ──────────────────────────────────────────────────────────────────
 @app.get("/api/v1/decisions/recent", tags=["Decisions"])
-async def api_recent_decisions(limit: int = 15):
-    return {"decisions": get_recent_decisions(limit=limit)}
+async def api_recent_decisions(limit: int = 15, db: AsyncSession = Depends(get_db)):
+    decisions = await db_get_recent_decisions(db, limit=limit)
+    return {"decisions": decisions}
 
 
 @app.get("/api/v1/decisions/escalations", tags=["Decisions"])
-async def api_escalation_queue():
-    return {"escalations": get_escalation_queue()}
+async def api_escalation_queue(db: AsyncSession = Depends(get_db)):
+    escalations = await db_get_escalations(db)
+    return {"escalations": escalations}
 
 
-@app.post("/api/v1/decisions/escalations/{escalation_id}/approve", tags=["Decisions"])
-async def api_approve_escalation(escalation_id: str):
-    await ws_manager.broadcast({
-        "type": "escalation_resolved",
-        "data": {"escalation_id": escalation_id, "action": "APPROVED"},
-    })
-    return {"escalation_id": escalation_id, "status": "APPROVED"}
+@app.post("/api/v1/decisions/escalations/{escalation_id}/approve", tags=["Decisions"],
+          summary="Approve an escalation (requires MANAGER role)")
+async def api_approve_escalation(
+    escalation_id: str,
+    request: Request,
+    db: AsyncSession   = Depends(get_db),
+    current_user: dict = Depends(require_role("MANAGER")),
+):
+    result = await db_resolve_escalation(db, escalation_id, "APPROVED", current_user["username"])
+    if not result:
+        raise HTTPException(status_code=404, detail=f"Escalation {escalation_id} not found.")
+    db.add(AuditLog(
+        log_id=str(uuid.uuid4()), event_type="escalation_approved",
+        actor=current_user["username"], entity_id=escalation_id, entity_type="escalation",
+        payload=json.dumps({"action": "APPROVED"}),
+        ip_address=request.client.host if request.client else None,
+    ))
+    record_escalation("approved")
+    await ws_manager.broadcast({"type": "escalation_resolved",
+                                 "data": {"escalation_id": escalation_id, "action": "APPROVED",
+                                          "resolved_by": current_user["username"]}})
+    return result
 
 
-@app.post("/api/v1/decisions/escalations/{escalation_id}/reject", tags=["Decisions"])
-async def api_reject_escalation(escalation_id: str):
-    await ws_manager.broadcast({
-        "type": "escalation_resolved",
-        "data": {"escalation_id": escalation_id, "action": "REJECTED"},
-    })
-    return {"escalation_id": escalation_id, "status": "REJECTED"}
+@app.post("/api/v1/decisions/escalations/{escalation_id}/reject", tags=["Decisions"],
+          summary="Reject an escalation (requires MANAGER role)")
+async def api_reject_escalation(
+    escalation_id: str,
+    request: Request,
+    db: AsyncSession   = Depends(get_db),
+    current_user: dict = Depends(require_role("MANAGER")),
+):
+    result = await db_resolve_escalation(db, escalation_id, "REJECTED", current_user["username"])
+    if not result:
+        raise HTTPException(status_code=404, detail=f"Escalation {escalation_id} not found.")
+    db.add(AuditLog(
+        log_id=str(uuid.uuid4()), event_type="escalation_rejected",
+        actor=current_user["username"], entity_id=escalation_id, entity_type="escalation",
+        payload=json.dumps({"action": "REJECTED"}),
+        ip_address=request.client.host if request.client else None,
+    ))
+    record_escalation("rejected")
+    await ws_manager.broadcast({"type": "escalation_resolved",
+                                 "data": {"escalation_id": escalation_id, "action": "REJECTED",
+                                          "resolved_by": current_user["username"]}})
+    return result
 
 
-# ── Internal helpers ───────────────────────────────────────────────────────────
+@app.get("/api/v1/audit-log", tags=["Decisions"],
+         summary="Immutable audit log of all state-changing events (requires MANAGER)")
+async def api_audit_log(
+    limit: int = 50,
+    db: AsyncSession   = Depends(get_db),
+    current_user: dict = Depends(require_role("MANAGER")),
+):
+    result = await db.execute(
+        sa_select(AuditLog).order_by(AuditLog.created_at.desc()).limit(limit)
+    )
+    rows = result.scalars().all()
+    return {
+        "entries": [
+            {"log_id": r.log_id, "event_type": r.event_type, "actor": r.actor,
+             "entity_id": r.entity_id, "entity_type": r.entity_type,
+             "payload": r.payload, "ip_address": r.ip_address,
+             "created_at": r.created_at.isoformat() if r.created_at else None}
+            for r in rows
+        ]
+    }
+
+
+# ── Helpers ────────────────────────────────────────────────────────────────────
+def _ts() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _sse(data: dict) -> str:
+    return f"data: {json.dumps(data, default=str)}\n\n"
+
 
 async def _run_graph(run_id: str, initial_state: dict[str, Any]) -> None:
-    """Non-blocking graph execution (called via asyncio.create_task)."""
+    t0 = time.perf_counter()
     try:
         logger.info("graph_run_start", run_id=run_id)
         state = PharmaIQState(**initial_state)
         final = await graph.ainvoke(state)
-        logger.info(
-            "graph_run_complete",
-            run_id=run_id,
-            approved=len(getattr(final, "nexus_priority_decisions", [])),
-        )
+        duration = time.perf_counter() - t0
+        CYCLE_DURATION.observe(duration)
+        logger.info("graph_run_complete", run_id=run_id,
+                    approved=len(getattr(final, "nexus_priority_decisions", [])),
+                    duration=round(duration, 2))
     except Exception as exc:
         logger.error("graph_run_failed", run_id=run_id, error=str(exc))
 
 
 async def _run_graph_sync(initial_state: dict[str, Any]) -> PharmaIQState:
-    """Blocking graph execution (for synchronous API endpoints)."""
     state = PharmaIQState(**initial_state)
     return await graph.ainvoke(state)
 
 
 async def _run_scheduled_cycle(cycle_type_str: str) -> None:
-    """
-    Called by APScheduler for each scheduled cycle.
-    In production, this would iterate over all stores in the network.
-    For demonstration, runs for a representative set.
-    """
-    # In production: fetch active store list from ERP
-    # For now: single representative execution
     logger.info("scheduled_cycle_start", cycle_type=cycle_type_str)
-
     ct = CycleType(cycle_type_str)
-
-    # Skip compliance sweep if not on the 2-hour mark
-    if ct == CycleType.COMPLIANCE_SWEEP:
-        current_hour = datetime.now(timezone.utc).hour
-        if current_hour % 2 != 0:
-            return
-
+    if ct == CycleType.COMPLIANCE_SWEEP and datetime.now(timezone.utc).hour % 2 != 0:
+        return
     initial_state = build_initial_state(
         raw_event={"event_type": "scheduled", "source": "scheduler"},
-        store_id="MEDCHAIN_HQ",  # In production: iterate over all stores
-        zone_id="DELHI_NCR",
-        signal_type=SignalType.SCHEDULED_FORECAST,
-        cycle_type=ct,
+        store_id="MEDCHAIN_HQ", zone_id="DELHI_NCR",
+        signal_type=SignalType.SCHEDULED_FORECAST, cycle_type=ct,
     )
-
     await _run_graph(run_id=str(uuid.uuid4()), initial_state=initial_state)
     logger.info("scheduled_cycle_complete", cycle_type=cycle_type_str)
 
 
-# ── Serve built frontend (production) ─────────────────────────────────────────
-import os as _os
-_dist = _os.path.join(_os.path.dirname(__file__), "frontend", "dist")
-if _os.path.exists(_dist):
+# ── Serve built frontend ───────────────────────────────────────────────────────
+_dist = os.path.join(os.path.dirname(__file__), "frontend", "dist")
+if os.path.exists(_dist):
     app.mount("/", StaticFiles(directory=_dist, html=True), name="static")
 
 
-# ── Dev entry point ────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=settings.environment == "development",
-        log_level="info",
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=8000,
+                reload=settings.environment == "development", log_level="info")

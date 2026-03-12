@@ -163,61 +163,84 @@ def get_temperature_trend(unit_id: str) -> list[dict[str, Any]]:
 
 def get_epidemic_signals() -> list[dict[str, Any]]:
     diseases = [
-        ("Dengue Fever", 0.87, "HIGH", 2.8, "East Delhi"),
-        ("Influenza H3N2", 0.62, "MEDIUM", 1.9, "Mumbai South"),
-        ("Gastroenteritis", 0.44, "MEDIUM", 1.4, "Bangalore North"),
-        ("Chikungunya", 0.31, "LOW", 1.2, "Chennai Central"),
+        ("Dengue Fever",     0.87, 2.8, 3, "East Delhi"),
+        ("Influenza H3N2",   0.62, 1.9, 5, "Mumbai South"),
+        ("Gastroenteritis",  0.44, 1.4, 7, "Bangalore North"),
+        ("Chikungunya",      0.31, 1.2, 9, "Chennai Central"),
     ]
     return [
         {
-            "signal_id": str(uuid.uuid4()),
-            "disease": d[0],
-            "probability": d[1],
-            "confidence": d[2],
-            "expected_demand_multiplier": d[3],
-            "zone": d[4],
-            "affected_stores": random.randint(4, 22),
-            "lead_time_days": random.randint(3, 8),
-            "status": "ACTIVE",
-            "data_sources": ["IDSP", "Google Trends", "IMD"],
+            "signal_id":        str(uuid.uuid4()),
+            "disease":          d[0],
+            "confidence":       d[1],          # float 0–1, used by frontend for %
+            "demand_multiplier": d[2],          # frontend reads demand_multiplier
+            "peak_week":        d[3],           # frontend reads peak_week
+            "affected_zones":   [d[4]],         # frontend reads affected_zones (list)
+            "key_drugs":        _epidemic_drugs(d[0]),
+            "affected_stores":  random.randint(4, 22),
+            "lead_time_days":   random.randint(3, 8),
+            "status":           "ACTIVE",
+            "data_sources":     ["IDSP", "Google Trends", "IMD"],
         }
         for d in diseases
     ]
 
 
+def _epidemic_drugs(disease: str) -> list[str]:
+    mapping = {
+        "Dengue Fever":    ["Paracetamol", "Dengue NS1 Kit", "ORS Sachets", "Platelet Boosters"],
+        "Influenza H3N2":  ["Oseltamivir", "Paracetamol", "Cetirizine", "Vitamin C"],
+        "Gastroenteritis": ["ORS Sachets", "Zinc Sulfate", "Domperidone", "Probiotics"],
+        "Chikungunya":     ["Paracetamol", "Ibuprofen", "Chloroquine", "Multivitamins"],
+    }
+    return mapping.get(disease, ["Paracetamol"])
+
+
 def get_demand_forecast(store_id: str = "STORE_DEL_001") -> list[dict[str, Any]]:
-    skus = ["Paracetamol 650mg", "ORS Sachets", "Dengue NS1 Kit", "Metformin 500mg", "Insulin Glargine", "Amoxicillin 500mg"]
+    skus = [
+        ("SKU-1001", "Paracetamol 650mg",   "OTC"),
+        ("SKU-1002", "ORS Sachets",          "OTC"),
+        ("SKU-1003", "Dengue NS1 Test Kit",  "Diagnostics"),
+        ("SKU-1004", "Metformin 500mg",      "Schedule H"),
+        ("SKU-1005", "Insulin Glargine",     "Schedule H"),
+        ("SKU-1006", "Amoxicillin 500mg",    "Schedule H"),
+    ]
     result = []
-    for sku in skus:
+    for sku_id, name, category in skus:
         baseline = random.randint(20, 200)
-        epidemic_mult = random.uniform(1.0, 3.5)
+        epidemic_mult = round(random.uniform(1.0, 3.5), 2)
+        adjusted = round(baseline * epidemic_mult)
+        conf = round(random.uniform(0.60, 0.95), 2)
+        action = "REORDER" if epidemic_mult > 2.0 else "MONITOR" if epidemic_mult > 1.3 else "OK"
         result.append({
-            "sku_name": sku,
-            "baseline_units": baseline,
-            "scenario_weighted_units": round(baseline * epidemic_mult),
-            "epidemic_adjustment": round(epidemic_mult, 2),
-            "confidence": round(random.uniform(0.6, 0.95), 2),
-            "horizon_days": 7,
-            "reorder_triggered": epidemic_mult > 1.5,
+            "sku_id":              sku_id,
+            "drug_name":           name,          # frontend reads drug_name
+            "category":            category,
+            "baseline_demand":     baseline,       # frontend reads baseline_demand
+            "epidemic_adjustment": epidemic_mult,  # frontend reads epidemic_adjustment
+            "adjusted_forecast":   adjusted,       # frontend reads adjusted_forecast
+            "confidence":          conf,           # float 0–1
+            "horizon_days":        7,
+            "recommended_action":  action,         # frontend reads recommended_action
+            "reorder_triggered":   epidemic_mult > 1.5,
         })
     return result
 
 
 def get_forecast_chart_data() -> list[dict[str, Any]]:
-    """7-day hourly forecast with scenario bands for the main chart."""
+    """28-day daily forecast with scenario bands for the main chart."""
     data = []
     base = 150
-    for day in range(7):
-        for hour in [0, 6, 12, 18]:
-            epidemic_factor = 1 + (day * 0.12)
-            point = {
-                "time": (datetime.now(timezone.utc) + timedelta(days=day, hours=hour)).strftime("%d/%m %H:%M"),
-                "baseline": round(base + random.gauss(0, 10)),
-                "epidemic_high": round(base * epidemic_factor * 1.3 + random.gauss(0, 8)),
-                "epidemic_weighted": round(base * epidemic_factor + random.gauss(0, 8)),
-                "historic_avg": round(base * 0.85 + random.gauss(0, 5)),
-            }
-            data.append(point)
+    for day in range(28):
+        epidemic_factor = 1 + (day * 0.04)
+        point = {
+            "date":              (datetime.now(timezone.utc) + timedelta(days=day)).strftime("%d %b"),
+            "baseline":          round(base + random.gauss(0, 10)),
+            "epidemic_high":     round(base * epidemic_factor * 1.3 + random.gauss(0, 8)),
+            "epidemic_weighted": round(base * epidemic_factor + random.gauss(0, 8)),
+            "historic_avg":      round(base * 0.85 + random.gauss(0, 5)),
+        }
+        data.append(point)
     return data
 
 

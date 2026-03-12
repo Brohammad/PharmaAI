@@ -23,3 +23,17 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Backup files
+*.bak
+
+# Database
+pharmaiq.db
+pharmaiq.db-shm
+pharmaiq.db-wal
+*.sqlite3
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/

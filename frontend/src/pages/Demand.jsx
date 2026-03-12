@@ -9,12 +9,18 @@ import {
 } from 'recharts'
 
 const DISEASE_COLOR = {
-  Dengue: '#f97316', Influenza: '#3b82f6', Malaria: '#8b5cf6', Norovirus: '#ec4899',
+  Dengue: '#f97316', Influenza: '#3b82f6', Malaria: '#8b5cf6',
+  Gastroenteritis: '#ec4899', Chikungunya: '#10b981', Norovirus: '#f59e0b',
+}
+
+function getDiseaseColor(name = '') {
+  const entry = Object.entries(DISEASE_COLOR).find(([k]) => name.includes(k))
+  return entry ? entry[1] : '#64748b'
 }
 
 function EpidemicCard({ signal }) {
-  const conf = Math.round(signal.confidence * 100)
-  const color = DISEASE_COLOR[signal.disease] ?? '#64748b'
+  const conf  = Math.round((signal.confidence ?? 0) * 100)
+  const color = getDiseaseColor(signal.disease)
   const urgency = conf >= 80 ? 'CRITICAL' : conf >= 60 ? 'HIGH' : 'MEDIUM'
 
   return (

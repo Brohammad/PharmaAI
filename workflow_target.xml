@@ -1,0 +1,1062 @@
+<mxfile host="app.diagrams.net" modified="2025-01-15T00:00:00.000Z" agent="PharmaIQ" version="24.0.0" type="device">
+  <diagram id="pharmaiq-workflow" name="PharmaIQ Eight-Agent Workflow">
+    <mxGraphModel dx="4000" dy="3000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="4000" pageHeight="3000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ============================================================
+             BACKGROUND TIER LANES
+             ============================================================ -->
+
+        <!-- Tier Labels Column -->
+        <mxCell id="tier_label_entry" value="ENTRY" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#666666;rotation=-90;" vertex="1" parent="1">
+          <mxGeometry x="0" y="180" width="40" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tier_label_memory" value="MEMORY&#xa;INJECTION" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#666666;rotation=-90;" vertex="1" parent="1">
+          <mxGeometry x="0" y="470" width="40" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tier_label_t1" value="TIER 1&#xa;OPERATIONAL" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#666666;rotation=-90;" vertex="1" parent="1">
+          <mxGeometry x="0" y="750" width="40" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tier_label_t2" value="TIER 2&#xa;VALIDATION" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#666666;rotation=-90;" vertex="1" parent="1">
+          <mxGeometry x="0" y="1200" width="40" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tier_label_t3" value="TIER 3&#xa;META / DECISION" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#666666;rotation=-90;" vertex="1" parent="1">
+          <mxGeometry x="0" y="1650" width="40" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tier_label_exec" value="EXECUTION" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#666666;rotation=-90;" vertex="1" parent="1">
+          <mxGeometry x="0" y="2050" width="40" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tier_label_learn" value="LEARNING" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#666666;rotation=-90;" vertex="1" parent="1">
+          <mxGeometry x="0" y="2400" width="40" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- Tier Background Bands -->
+        <mxCell id="band_entry" value="" style="rounded=1;whiteSpace=wrap;fillColor=#F5F5F5;strokeColor=#E0E0E0;strokeWidth=1;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="50" y="100" width="3400" height="330" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_memory" value="" style="rounded=1;whiteSpace=wrap;fillColor=#FFF8E1;strokeColor=#FFE082;strokeWidth=1;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="50" y="450" width="3400" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_t1" value="" style="rounded=1;whiteSpace=wrap;fillColor=#E3F2FD;strokeColor=#90CAF9;strokeWidth=1;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="50" y="670" width="3400" height="430" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_t2" value="" style="rounded=1;whiteSpace=wrap;fillColor=#FCE4EC;strokeColor=#F48FB1;strokeWidth=1;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="50" y="1120" width="3400" height="410" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_t3" value="" style="rounded=1;whiteSpace=wrap;fillColor=#E8F5E9;strokeColor=#A5D6A7;strokeWidth=1;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="50" y="1550" width="3400" height="370" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_exec" value="" style="rounded=1;whiteSpace=wrap;fillColor=#EDE7F6;strokeColor=#CE93D8;strokeWidth=1;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="50" y="1940" width="3400" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_learn" value="" style="rounded=1;whiteSpace=wrap;fillColor=#FFF3E0;strokeColor=#FFB74D;strokeWidth=1;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="50" y="2260" width="3400" height="280" as="geometry" />
+        </mxCell>
+
+        <!-- Band Labels (inside bands) -->
+        <mxCell id="band_label_entry" value="SIGNAL INGESTION &amp; CLASSIFICATION" style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontStyle=1;fontColor=#9E9E9E;" vertex="1" parent="1">
+          <mxGeometry x="70" y="108" width="300" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_label_memory" value="CHRONICLE CONTEXT INJECTION" style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontStyle=1;fontColor=#F9A825;" vertex="1" parent="1">
+          <mxGeometry x="70" y="458" width="300" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_label_t1" value="TIER 1  OPERATIONAL AGENTS (Domain-Specific Reasoning)" style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontStyle=1;fontColor=#1565C0;" vertex="1" parent="1">
+          <mxGeometry x="70" y="678" width="500" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_label_t2" value="TIER 2  VALIDATION AGENTS (Adversarial Review &amp; Regulatory Verification)" style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontStyle=1;fontColor=#C62828;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1128" width="500" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_label_t3" value="TIER 3  META AGENTS (Cross-Domain Synthesis &amp; Decision Authority)" style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontStyle=1;fontColor=#2E7D32;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1558" width="500" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_label_exec" value="ACTION EXECUTION &amp; HUMAN INTERACTION" style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontStyle=1;fontColor=#6A1B9A;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1948" width="400" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="band_label_learn" value="INSTITUTIONAL LEARNING &amp; AUDIT" style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontStyle=1;fontColor=#E65100;" vertex="1" parent="1">
+          <mxGeometry x="70" y="2268" width="400" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             SIGNAL SOURCES (Top)
+             ============================================================ -->
+
+        <mxCell id="src_iot" value="<! IoT Sensors&#xa;(960 Units)" style="shape=mxgraph.basic.cloud_callout;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#90A4AE;fontSize=10;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="10" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="src_pos" value="<� POS / ERP&#xa;(320 Stores)" style="shape=mxgraph.basic.cloud_callout;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#90A4AE;fontSize=10;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="370" y="10" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="src_idsp" value="<� IDSP / WHO&#xa;Surveillance" style="shape=mxgraph.basic.cloud_callout;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#90A4AE;fontSize=10;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="640" y="10" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="src_env" value="<$ IMD / CPCB&#xa;Weather &amp; AQI" style="shape=mxgraph.basic.cloud_callout;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#90A4AE;fontSize=10;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="910" y="10" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="src_cdsco" value="� CDSCO&#xa;Recalls &amp; Notices" style="shape=mxgraph.basic.cloud_callout;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#90A4AE;fontSize=10;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="10" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="src_hrms" value="=e HRMS&#xa;Staff Changes" style="shape=mxgraph.basic.cloud_callout;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#90A4AE;fontSize=10;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="10" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="src_schedule" value="� Scheduled&#xa;Cycles" style="shape=mxgraph.basic.cloud_callout;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#90A4AE;fontSize=10;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="1720" y="10" width="140" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Source to Ingestion edges -->
+        <mxCell id="e_src_iot" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;strokeColor=#90A4AE;strokeWidth=1;dashed=1;" edge="1" source="src_iot" target="signal_ingestion" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_src_pos" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;strokeColor=#90A4AE;strokeWidth=1;dashed=1;" edge="1" source="src_pos" target="signal_ingestion" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_src_idsp" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;strokeColor=#90A4AE;strokeWidth=1;dashed=1;" edge="1" source="src_idsp" target="signal_ingestion" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_src_env" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;strokeColor=#90A4AE;strokeWidth=1;dashed=1;" edge="1" source="src_env" target="signal_ingestion" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_src_cdsco" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;strokeColor=#90A4AE;strokeWidth=1;dashed=1;" edge="1" source="src_cdsco" target="signal_ingestion" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_src_hrms" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;strokeColor=#90A4AE;strokeWidth=1;dashed=1;" edge="1" source="src_hrms" target="signal_ingestion" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_src_schedule" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;strokeColor=#90A4AE;strokeWidth=1;dashed=1;" edge="1" source="src_schedule" target="signal_ingestion" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             SIGNAL INGESTION NODE
+             ============================================================ -->
+
+        <mxCell id="signal_ingestion" value="SIGNAL INGESTION&#xa;&amp; CLASSIFIER" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;size=20;fillColor=#455A64;strokeColor=#263238;fontColor=#FFFFFF;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="140" width="240" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="signal_ingestion_detail" value="" Classifies signal domain&#xa;" Determines routing path&#xa;" Assigns urgency level&#xa;" Tags signal metadata" style="text;html=1;align=left;verticalAlign=top;fontSize=9;fontColor=#78909C;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="700" y="240" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Classification Router Diamond -->
+        <mxCell id="router_classify" value="Signal&#xa;Type?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#546E7A;strokeColor=#37474F;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="320" width="120" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_ingest_to_router" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#455A64;strokeWidth=2;" edge="1" source="signal_ingestion" target="router_classify" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             CHRONICLE CONTEXT INJECTION
+             ============================================================ -->
+
+        <mxCell id="chronicle_inject" value="CHRONICLE&#xa;Context Injection" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#FFF176;strokeColor=#F9A825;fontSize=12;fontStyle=1;size=0.04;" vertex="1" parent="1">
+          <mxGeometry x="670" y="490" width="300" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="chronicle_inject_detail" value="Injects: Historical patterns " Past decision outcomes&#xa;Agent performance context " Confidence calibrations&#xa;Store-specific notes " Seasonal adjustments" style="text;html=1;align=center;verticalAlign=top;fontSize=9;fontColor=#F57F17;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="670" y="565" width="300" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Router to Chronicle -->
+        <mxCell id="e_router_to_chronicle" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#F9A825;strokeWidth=2;" edge="1" source="router_classify" target="chronicle_inject" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_router_to_chronicle_label" value="All signals&#xa;requiring&#xa;Tier 1 reasoning" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=8;fontColor=#F9A825;" vertex="1" connectable="0" parent="e_router_to_chronicle">
+          <mxGeometry x="-0.3" relative="1" as="geometry">
+            <mxPoint x="70" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============================================================
+             TIER 1: OPERATIONAL AGENTS
+             ============================================================ -->
+
+        <!-- SENTINEL -->
+        <mxCell id="sentinel" value="=� SENTINEL&#xa;Cold Chain Guardian" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1565C0;strokeColor=#0D47A1;fontColor=#FFFFFF;fontSize=13;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="720" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sentinel_detail" value="" Real-time temp monitoring&#xa;" Excursion classification&#xa;" Trajectory prediction&#xa;" Cumulative thermal stress&#xa;" Quarantine recommendations&#xa;" Predictive maintenance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#90CAF9;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="100" y="810" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sentinel_mcp" value="MCP: Cold Chain IoT &#xa;ERP (read) " Reg Knowledge" style="text;html=1;align=center;fontSize=8;fontColor=#1565C0;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="100" y="905" width="220" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- PULSE (Demand) -->
+        <mxCell id="pulse_demand" value="=� PULSE&#xa;Demand Forecasting" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1565C0;strokeColor=#0D47A1;fontColor=#FFFFFF;fontSize=13;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="720" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pulse_demand_detail" value="" Scenario-weighted forecasts&#xa;" Multi-source signal fusion&#xa;" Generic launch tracking&#xa;" Preemptive procurement&#xa;" Recheck trigger generation&#xa;" Stockout risk prediction" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#90CAF9;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="430" y="810" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pulse_demand_mcp" value="MCP: ERP (read) " External Intel&#xa;Distributor (read)" style="text;html=1;align=center;fontSize=8;fontColor=#1565C0;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="430" y="905" width="220" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- PULSE (Epidemic) -->
+        <mxCell id="pulse_epidemic" value=">� PULSE&#xa;Epidemic Detection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1565C0;strokeColor=#0D47A1;fontColor=#FFFFFF;fontSize=13;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="720" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pulse_epidemic_detail" value="" IDSP surveillance fusion&#xa;" AQI correlation analysis&#xa;" POS anomaly detection&#xa;" Google Trends health data&#xa;" Confidence-scored alerts&#xa;" Zone impact mapping" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#90CAF9;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="760" y="810" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pulse_epidemic_mcp" value="MCP: External Intelligence&#xa;ERP (read)" style="text;html=1;align=center;fontSize=8;fontColor=#1565C0;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="760" y="905" width="220" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- AEGIS -->
+        <mxCell id="aegis" value="=� AEGIS&#xa;Staffing &amp; Compliance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1565C0;strokeColor=#0D47A1;fontColor=#FFFFFF;fontSize=13;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="720" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="aegis_detail" value="" Dynamic scheduling&#xa;" Pharmacist compliance monitor&#xa;" Overtime budget tracking&#xa;" Contingency pre-computation&#xa;" Demand-responsive staffing&#xa;" Zone pool optimisation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#90CAF9;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="810" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="aegis_mcp" value="MCP: HRMS (read-write)&#xa;Reg Knowledge (read)" style="text;html=1;align=center;fontSize=8;fontColor=#1565C0;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="905" width="220" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- MERIDIAN -->
+        <mxCell id="meridian" value="=� MERIDIAN&#xa;Expiry &amp; Inventory" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1565C0;strokeColor=#0D47A1;fontColor=#FFFFFF;fontSize=13;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="720" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="meridian_detail" value="" Batch lifecycle state machine&#xa;" Expiry risk scoring&#xa;" PULSE-integrated velocity&#xa;" Inter-store transfer engine&#xa;" Markdown optimisation&#xa;" Distributor return management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#90CAF9;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="810" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="meridian_mcp" value="MCP: ERP (read-write)&#xa;Distributor (read)" style="text;html=1;align=center;fontSize=8;fontColor=#1565C0;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="905" width="220" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             CHRONICLE to TIER 1 EDGES
+             ============================================================ -->
+
+        <mxCell id="e_chr_sentinel" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#F9A825;strokeWidth=1;dashed=1;entryX=0.5;entryY=0;" edge="1" source="chronicle_inject" target="sentinel" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_chr_sentinel_label" value="context" style="edgeLabel;html=1;fontSize=8;fontColor=#F9A825;" vertex="1" connectable="0" parent="e_chr_sentinel">
+          <mxGeometry x="0.5" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_chr_pulse_d" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#F9A825;strokeWidth=1;dashed=1;entryX=0.5;entryY=0;" edge="1" source="chronicle_inject" target="pulse_demand" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_chr_pulse_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#F9A825;strokeWidth=1;dashed=1;entryX=0.5;entryY=0;" edge="1" source="chronicle_inject" target="pulse_epidemic" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_chr_aegis" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#F9A825;strokeWidth=1;dashed=1;entryX=0.5;entryY=0;" edge="1" source="chronicle_inject" target="aegis" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1200" y="630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_chr_meridian" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#F9A825;strokeWidth=1;dashed=1;entryX=0.5;entryY=0;" edge="1" source="chronicle_inject" target="meridian" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1530" y="630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============================================================
+             INTER-AGENT FLOWS (Tier 1 cross-communication)
+             ============================================================ -->
+
+        <!-- Epidemic � Demand -->
+        <mxCell id="e_epidemic_demand" value="epidemic&#xa;signal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#1565C0;strokeWidth=2;entryX=1;entryY=0.5;exitX=0;exitY=0.5;" edge="1" source="pulse_epidemic" target="pulse_demand" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Epidemic � AEGIS -->
+        <mxCell id="e_epidemic_aegis" value="staffing&#xa;demand" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#1565C0;strokeWidth=1;dashed=1;exitX=1;exitY=0.5;entryX=0;entryY=0.3;" edge="1" source="pulse_epidemic" target="aegis" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Demand � MERIDIAN -->
+        <mxCell id="e_demand_meridian" value="velocity&#xa;update" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#1565C0;strokeWidth=1;dashed=1;exitX=1;exitY=0.75;entryX=0;entryY=0.5;" edge="1" source="pulse_demand" target="meridian" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="680" y="840" />
+              <mxPoint x="680" y="950" />
+              <mxPoint x="1400" y="950" />
+              <mxPoint x="1400" y="760" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- SENTINEL � MERIDIAN (quarantine) -->
+        <mxCell id="e_sentinel_meridian" value="quarantine �&#xa;replacement" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#C62828;strokeWidth=2;exitX=1;exitY=0.75;entryX=0;entryY=0.75;" edge="1" source="sentinel" target="meridian" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="780" />
+              <mxPoint x="350" y="970" />
+              <mxPoint x="1390" y="970" />
+              <mxPoint x="1390" y="780" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- SENTINEL � AEGIS (pharmacist needed) -->
+        <mxCell id="e_sentinel_aegis" value="pharmacist&#xa;needed" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#1565C0;strokeWidth=1;dashed=1;exitX=1;exitY=0.25;entryX=0;entryY=0.7;" edge="1" source="sentinel" target="aegis" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="738" />
+              <mxPoint x="360" y="690" />
+              <mxPoint x="1060" y="690" />
+              <mxPoint x="1060" y="776" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============================================================
+             SIGNIFICANCE THRESHOLD GATE
+             ============================================================ -->
+
+        <mxCell id="significance_gate" value="Significance&#xa;Threshold&#xa;Check" style="rhombus;whiteSpace=wrap;html=1;fillColor=#E91E63;strokeColor=#AD1457;fontColor=#FFFFFF;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="980" width="100" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Tier 1 to Significance Gate -->
+        <mxCell id="e_sentinel_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="sentinel" target="significance_gate" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="1020" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_sentinel_gate_label" value="recommendations" style="edgeLabel;html=1;fontSize=8;fontColor=#C62828;" vertex="1" connectable="0" parent="e_sentinel_gate">
+          <mxGeometry x="0.3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_pulse_d_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="pulse_demand" target="significance_gate" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="1020" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_pulse_e_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="pulse_epidemic" target="significance_gate" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_aegis_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="aegis" target="significance_gate" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1200" y="1020" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_meridian_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="meridian" target="significance_gate" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1530" y="1020" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============================================================
+             TIER 2: CRITIQUE AGENT
+             ============================================================ -->
+
+        <mxCell id="critique" value="� CRITIQUE&#xa;Adversarial Validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C62828;strokeColor=#B71C1C;fontColor=#FFFFFF;fontSize=14;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="1160" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="critique_detail" value="Challenge Dimensions:&#xa;1. Data Quality Audit&#xa;2. Assumption Stress Test&#xa;3. Historical Pattern Match&#xa;4. Second-Order Effects&#xa;5. Proportionality Check" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#F48FB1;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="350" y="1250" width="280" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Significance Gate to CRITIQUE -->
+        <mxCell id="e_gate_critique" value="Above&#xa;threshold" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="significance_gate" target="critique" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="820" y="1100" />
+              <mxPoint x="490" y="1100" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- CRITIQUE Verdict Diamond -->
+        <mxCell id="critique_verdict" value="Verdict?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#C62828;strokeColor=#B71C1C;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="440" y="1370" width="100" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_critique_to_verdict" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="critique" target="critique_verdict" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             CHALLENGE-RESPONSE LOOP
+             ============================================================ -->
+
+        <mxCell id="agent_revision" value="Agent Revision&#xa;(Address Concerns)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF9A9A;strokeColor=#E57373;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="1180" width="180" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Challenge loop: Verdict � Revision � Critique -->
+        <mxCell id="e_verdict_revision" value="CHALLENGED&#xa;(max 3x)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#E57373;strokeWidth=2;entryX=0.5;entryY=1;" edge="1" source="critique_verdict" target="agent_revision" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="1410" />
+              <mxPoint x="300" y="1300" />
+              <mxPoint x="190" y="1300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_revision_critique" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#E57373;strokeWidth=2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="agent_revision" target="critique" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_revision_critique_label" value="revised&#xa;recommendation" style="edgeLabel;html=1;fontSize=8;fontColor=#E57373;" vertex="1" connectable="0" parent="e_revision_critique">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Challenge loop counter -->
+        <mxCell id="loop_counter" value="Challenge Loop&#xa;Max 3 iterations&#xa;Then � NEXUS" style="text;html=1;align=center;fontSize=8;fontColor=#C62828;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="100" y="1260" width="180" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             TIER 2: COMPLIANCE AGENT
+             ============================================================ -->
+
+        <mxCell id="compliance" value="� COMPLIANCE&#xa;Regulatory Verification" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C62828;strokeColor=#B71C1C;fontColor=#FFFFFF;fontSize=14;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="1160" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="compliance_detail" value="Regulatory Domains:&#xa;" Drugs &amp; Cosmetics Act " CDSCO Guidelines&#xa;" State Pharmacy Acts " WHO PQS Standards&#xa;" Shops &amp; Establishments " DPCO Pricing&#xa;Version-controlled " Auditable " Deterministic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#F48FB1;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="800" y="1250" width="280" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- CRITIQUE � COMPLIANCE (validated/downgraded) -->
+        <mxCell id="e_critique_compliance" value="VALIDATED /&#xa;DOWNGRADED" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="critique_verdict" target="compliance" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="1410" />
+              <mxPoint x="600" y="1140" />
+              <mxPoint x="940" y="1140" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Low significance bypasses CRITIQUE � goes directly to COMPLIANCE -->
+        <mxCell id="e_gate_compliance_bypass" value="Below threshold&#xa;(routine actions)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#F48FB1;strokeWidth=1;dashed=1;" edge="1" source="significance_gate" target="compliance" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="1060" />
+              <mxPoint x="940" y="1140" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- COMPLIANCE Verdict Diamond -->
+        <mxCell id="compliance_verdict" value="Compliant?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#C62828;strokeColor=#B71C1C;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="890" y="1370" width="100" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_compliance_to_verdict" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="compliance" target="compliance_verdict" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- REJECTED paths (to learning) -->
+        <mxCell id="rejected_box" value="L REJECTED / NON-COMPLIANT&#xa;Logged for Learning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#E57373;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="1380" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_critique_rejected" value="REJECTED" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#E57373;strokeWidth=1;dashed=1;exitX=0.5;exitY=1;" edge="1" source="critique_verdict" target="rejected_box" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="490" y="1480" />
+              <mxPoint x="1300" y="1480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e_compliance_rejected" value="NON-&#xa;COMPLIANT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#E57373;strokeWidth=1;dashed=1;exitX=1;exitY=0.5;" edge="1" source="compliance_verdict" target="rejected_box" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             TIER 3: NEXUS
+             ============================================================ -->
+
+        <mxCell id="nexus" value=">� NEXUS&#xa;Cross-Domain Synthesis&#xa;&amp; Decision Authority" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E7D32;strokeColor=#1B5E20;fontColor=#FFFFFF;fontSize=14;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="1590" width="320" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="nexus_detail" value="Priority: Patient Safety � Regulatory � Commercial � Efficiency&#xa;Conflict resolution " Resource arbitration " Cascading dependency management" style="text;html=1;align=center;fontSize=9;fontColor=#2E7D32;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="520" y="1690" width="400" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- COMPLIANCE � NEXUS -->
+        <mxCell id="e_compliance_nexus" value="COMPLIANT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#2E7D32;strokeWidth=3;" edge="1" source="compliance_verdict" target="nexus" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="1560" />
+              <mxPoint x="720" y="1560" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Max iterations � NEXUS -->
+        <mxCell id="e_maxiter_nexus" value="Max iterations&#xa;reached" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#E57373;strokeWidth=1;dashed=1;" edge="1" source="agent_revision" target="nexus" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="80" y="1210" />
+              <mxPoint x="80" y="1560" />
+              <mxPoint x="720" y="1560" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- NEXUS Authority Diamond -->
+        <mxCell id="nexus_authority" value="Authority&#xa;Level?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#2E7D32;strokeColor=#1B5E20;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="1740" width="100" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_nexus_to_authority" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#2E7D32;strokeWidth=2;" edge="1" source="nexus" target="nexus_authority" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             AUTHORITY LEVEL BOXES
+             ============================================================ -->
+
+        <mxCell id="auth_auto" value="� AUTOMATED&#xa;Executes immediately" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#66BB6A;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="1830" width="170" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="auth_informed" value="=� HUMAN-INFORMED&#xa;Execute + notify" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEDC8;strokeColor=#AED581;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="1830" width="170" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="auth_required" value=" HUMAN-REQUIRED&#xa;Recommend, await approval" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#FFF176;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="730" y="1830" width="190" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="auth_only" value="=d HUMAN-ONLY&#xa;Data provided, no recommendation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#FFB74D;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="970" y="1830" width="210" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- NEXUS Authority � Boxes -->
+        <mxCell id="e_auth_auto" value="AUTO" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#66BB6A;strokeWidth=2;" edge="1" source="nexus_authority" target="auth_auto" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_auth_informed" value="INFORMED" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#AED581;strokeWidth=2;" edge="1" source="nexus_authority" target="auth_informed" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_auth_required" value="REQUIRED" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#FFF176;strokeWidth=2;" edge="1" source="nexus_authority" target="auth_required" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_auth_only" value="ONLY" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#FFB74D;strokeWidth=2;" edge="1" source="nexus_authority" target="auth_only" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             EXECUTION LAYER
+             ============================================================ -->
+
+        <mxCell id="action_execution" value="� ACTION EXECUTION ENGINE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6A1B9A;strokeColor=#4A148C;fontColor=#FFFFFF;fontSize=13;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="1970" width="370" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="action_exec_detail" value="Executes via MCP Servers: ERP " HRMS " Distributor " Cold Chain IoT " Communication&#xa;Rollback capability for reversible actions " Max 2 retries then escalate" style="text;html=1;align=center;fontSize=8;fontColor=#6A1B9A;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="270" y="2045" width="410" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Auth � Execution -->
+        <mxCell id="e_auto_exec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6A1B9A;strokeWidth=2;" edge="1" source="auth_auto" target="action_execution" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_informed_exec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6A1B9A;strokeWidth=2;" edge="1" source="auth_informed" target="action_execution" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Human Escalation Handler -->
+        <mxCell id="human_handler" value="=d HUMAN ESCALATION HANDLER" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF8F00;strokeColor=#E65100;fontColor=#FFFFFF;fontSize=12;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="1970" width="320" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="human_handler_detail" value="Multi-channel delivery " Acknowledgement tracking " Escalation chains&#xa;Timeout: 15min (critical) � 1hr (urgent) � 4hr (important)" style="text;html=1;align=center;fontSize=8;fontColor=#E65100;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="780" y="2045" width="360" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Auth Required � Human Handler -->
+        <mxCell id="e_required_human" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#FF8F00;strokeWidth=2;" edge="1" source="auth_required" target="human_handler" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_only_human" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#FF8F00;strokeWidth=2;" edge="1" source="auth_only" target="human_handler" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Human Response Diamond -->
+        <mxCell id="human_response" value="Human&#xa;Response?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FF8F00;strokeColor=#E65100;fontColor=#FFFFFF;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="910" y="2100" width="100" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_human_to_response" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#FF8F00;strokeWidth=2;" edge="1" source="human_handler" target="human_response" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Human Approved � Execution -->
+        <mxCell id="e_human_approved" value="APPROVED /&#xa;MODIFIED" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#66BB6A;strokeWidth=2;" edge="1" source="human_response" target="action_execution" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="2140" />
+              <mxPoint x="700" y="2005" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Human Rejected � Learning -->
+        <mxCell id="e_human_rejected" value="REJECTED" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#E57373;strokeWidth=1;dashed=1;" edge="1" source="human_response" target="chronicle_learning" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1100" y="2140" />
+              <mxPoint x="1100" y="2220" />
+              <mxPoint x="720" y="2220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Escalation Loop (no response) -->
+        <mxCell id="e_human_escalate" value="No response �&#xa;Escalate&#xa;(max 3 levels)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#FF8F00;strokeWidth=1;dashed=1;exitX=1;exitY=0.5;entryX=1;entryY=1;" edge="1" source="human_response" target="human_handler" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1200" y="2140" />
+              <mxPoint x="1200" y="2040" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============================================================
+             LEARNING & AUDIT LAYER
+             ============================================================ -->
+
+        <mxCell id="chronicle_learning" value="=� CHRONICLE  Institutional Learning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E65100;strokeColor=#BF360C;fontColor=#FFFFFF;fontSize=13;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="310" y="2300" width="360" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="chronicle_learning_detail" value="" Decision outcome tracking  predicted vs actual&#xa;" Pattern library maintenance  seasonal, epidemic, generic curves&#xa;" Agent performance evaluation  rolling 30-day metrics&#xa;" Confidence calibration  90-day accuracy vs stated confidence&#xa;" Red team scenario generation  weekly adversarial testing&#xa;" Counterfactual analysis  what would have happened without us" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FFB74D;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="310" y="2380" width="360" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Execution � Learning -->
+        <mxCell id="e_exec_learning" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#E65100;strokeWidth=2;" edge="1" source="action_execution" target="chronicle_learning" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="475" y="2100" />
+              <mxPoint x="475" y="2250" />
+              <mxPoint x="490" y="2250" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_exec_learning_label" value="outcomes + actions" style="edgeLabel;html=1;fontSize=8;fontColor=#E65100;" vertex="1" connectable="0" parent="e_exec_learning">
+          <mxGeometry x="0.3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Rejected � Learning -->
+        <mxCell id="e_rejected_learning" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#E57373;strokeWidth=1;dashed=1;" edge="1" source="rejected_box" target="chronicle_learning" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1300" y="1500" />
+              <mxPoint x="1500" y="1500" />
+              <mxPoint x="1500" y="2250" />
+              <mxPoint x="490" y="2250" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Audit Finalisation -->
+        <mxCell id="audit_final" value="= AUDIT FINALISATION&#xa;Immutable Record" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#37474F;strokeColor=#263238;fontColor=#FFFFFF;fontSize=12;fontStyle=1;arcSize=12;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="810" y="2310" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="audit_final_detail" value="Complete reasoning chain " All verdicts " All actions&#xa;Data sources with freshness " Model versions " Reg KB versions&#xa;Regulatory retention compliance " Append-only log" style="text;html=1;align=center;fontSize=8;fontColor=#546E7A;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="780" y="2375" width="300" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Learning � Audit -->
+        <mxCell id="e_learning_audit" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#37474F;strokeWidth=2;" edge="1" source="chronicle_learning" target="audit_final" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             CHRONICLE FEEDBACK LOOP (Learning back to Context Injection)
+             ============================================================ -->
+
+        <mxCell id="e_learning_feedback" value="Learning signals fed&#xa;back to Context Injection&#xa;for next reasoning cycle" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#F9A825;strokeWidth=2;dashed=1;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="chronicle_learning" target="chronicle_inject" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="60" y="2335" />
+              <mxPoint x="60" y="525" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Red Team feedback loop -->
+        <mxCell id="e_redteam_feedback" value="Red Team&#xa;Scenarios" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#FF6F00;strokeWidth=1;dashed=1;exitX=0;exitY=0;entryX=0;entryY=1;" edge="1" source="chronicle_learning" target="signal_ingestion" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="2290" />
+              <mxPoint x="280" y="2250" />
+              <mxPoint x="40" y="2250" />
+              <mxPoint x="40" y="200" />
+              <mxPoint x="700" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============================================================
+             MCP SERVER SIDEBAR
+             ============================================================ -->
+
+        <mxCell id="mcp_title" value="MCP SERVER LAYER" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#00695C;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="120" width="250" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mcp_coldchain" value="<! Cold Chain IoT Server&#xa;960 sensors " 60s reads " Edge fallback" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#4DB6AC;fontSize=10;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="170" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mcp_erp" value="<� ERP / Inventory Server&#xa;SAP B1 " Batch tracking " PO execution" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#4DB6AC;fontSize=10;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="240" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mcp_hrms" value="=e HRMS Server&#xa;Zoho People " Scheduling " Compliance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#4DB6AC;fontSize=10;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="310" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mcp_distributor" value="=� Distributor Integration Server&#xa;8 APIs + email fallback" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#4DB6AC;fontSize=10;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="380" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mcp_external" value="<
+ External Intelligence Server&#xa;IDSP " IMD " CPCB " Google Trends " WHO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#4DB6AC;fontSize=10;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="450" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mcp_regulatory" value="� Regulatory Knowledge Server&#xa;Version-controlled " Auditable " Manual-verified" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#4DB6AC;fontSize=10;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="520" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mcp_communication" value="=� Communication &amp; Notification Server&#xa;Phone " SMS " Push " Email " Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#4DB6AC;fontSize=10;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="590" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- MCP Connection Lines (dotted to agents) -->
+        <mxCell id="e_mcp_sentinel" style="strokeColor=#4DB6AC;strokeWidth=1;dashed=1;rounded=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" source="mcp_coldchain" target="sentinel" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1700" y="195" />
+              <mxPoint x="1700" y="760" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============================================================
+             SCHEDULED CYCLES SIDEBAR
+             ============================================================ -->
+
+        <mxCell id="sched_title" value="SCHEDULED CYCLES" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;fontColor=#5D4037;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="710" width="250" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sched_morning" value="< 05:00  Morning Forecast&#xa;All stores " PULSE + AEGIS + MERIDIAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFEBE9;strokeColor=#BCAAA4;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="750" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sched_midday" value="  13:00  Midday Reforecast&#xa;Adjust afternoon staffing + procurement" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFEBE9;strokeColor=#BCAAA4;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="800" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sched_compliance" value="� Every 2hr  Compliance Sweep&#xa;Pharmacist presence verification" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFEBE9;strokeColor=#BCAAA4;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="850" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sched_expiry" value="< 22:00  Expiry Risk Review&#xa;Full-day velocity recalculation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFEBE9;strokeColor=#BCAAA4;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="900" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sched_weekly" value="=� Mon 07:00  Weekly Intelligence Brief&#xa;Performance + patterns + calibration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFEBE9;strokeColor=#BCAAA4;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="950" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sched_redteam" value="=4 Wed 02:00  Red Team Exercise&#xa;Synthetic scenario stress test" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#EF9A9A;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="1000" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sched_calibration" value="=� Monthly  Confidence Calibration&#xa;90-day stated vs actual accuracy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFEBE9;strokeColor=#BCAAA4;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="1050" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             ERROR HANDLING SIDEBAR
+             ============================================================ -->
+
+        <mxCell id="error_title" value="ERROR HANDLING" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;fontColor=#B71C1C;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="1140" width="250" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="error_api" value="� Gemini API Failure&#xa;� 3x retry with backoff&#xa;� Local rules engine fallback&#xa;� Safety-only decisions&#xa;� Queue for API recovery" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#EF9A9A;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="1180" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="error_mcp" value="� MCP Server Failure&#xa;� 2x retry with backoff&#xa;� Degraded mode with stale data&#xa;� CRITIQUE tightens scrutiny&#xa;� Log degraded window" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#EF9A9A;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="1270" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="error_circuit" value="=4 Circuit Breaker&#xa;� 5+ failures in 10 min window&#xa;� Halt non-critical processing&#xa;� SENTINEL + AEGIS safety only&#xa;� 5 min cooldown � gradual restore" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#E57373;fontSize=9;align=left;spacing=6;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="1360" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="error_loop" value="� Infinite Loop Prevention&#xa;� CRITIQUE loop: max 3 iter / 30 min&#xa;� Escalation loop: max 3 levels / 2 hr&#xa;� Per-store cycle: max 60 min&#xa;� Break � safest default � log" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#EF9A9A;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="1450" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             AUTHORITY MATRIX SIDEBAR
+             ============================================================ -->
+
+        <mxCell id="auth_title" value="AUTHORITY MATRIX" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;fontColor=#1B5E20;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="1590" width="250" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="auth_matrix" value="� AUTOMATED:&#xa;  " Severe cold chain quarantine&#xa;  " Routine shift adjustments&#xa;  " Reorders up to 2.5x&#xa;  " Same-zone transfers&#xa;  " Standard recall shelf-removal&#xa;&#xa;=� HUMAN-INFORMED:&#xa;  " Moderate quarantine&#xa;  " Overtime schedule changes&#xa;  " Reorders 2.5x-3x&#xa;  " Cross-zone transfers&#xa;  " Near-expiry markdown&#xa;&#xa; HUMAN-REQUIRED:&#xa;  " Reorders above 3x&#xa;  " Emergency cross-zone staff&#xa;  " CDSCO formal notifications&#xa;  " Patient notifications&#xa;  " Batch destruction&#xa;  " Actions above �2 lakh&#xa;&#xa;=d HUMAN-ONLY:&#xa;  " Store closure&#xa;  " Regulatory submissions&#xa;  " Legal claims&#xa;  " Public communications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#A5D6A7;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="1630" width="260" height="380" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             ETHICS FRAMEWORK BOX (Bottom)
+             ============================================================ -->
+
+        <mxCell id="ethics_title" value="ETHICAL FRAMEWORK" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;fontColor=#283593;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="2090" width="250" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ethics_box" value="=� Patient Safety:&#xa;  Tolerate false positives (cost)&#xa;  to eliminate false negatives (harm)&#xa;&#xa;=e Workforce Ethics:&#xa;  Augment, never replace&#xa;  No AI compliance metrics for staff&#xa;  Override always available&#xa;&#xa;<� Public Health Reciprocity:&#xa;  Anonymised demand signals&#xa;  shared with district health&#xa;&#xa;=
+ Transparency:&#xa;  3-level explainability&#xa;  Plain language patient notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#9FA8DA;fontSize=9;align=left;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="2130" width="260" height="230" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             LEGEND
+             ============================================================ -->
+
+        <mxCell id="legend_title" value="LEGEND" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2140" y="120" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend_bg" value="" style="rounded=1;whiteSpace=wrap;fillColor=#FAFAFA;strokeColor=#E0E0E0;" vertex="1" parent="1">
+          <mxGeometry x="2100" y="160" width="280" height="470" as="geometry" />
+        </mxCell>
+
+        <!-- Legend Agent Colors -->
+        <mxCell id="leg_t1" value="" style="rounded=1;fillColor=#1565C0;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="180" width="30" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_t1_text" value="Tier 1  Operational Agents" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="178" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_t2" value="" style="rounded=1;fillColor=#C62828;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="210" width="30" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_t2_text" value="Tier 2  Validation Agents" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="208" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_t3" value="" style="rounded=1;fillColor=#2E7D32;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="240" width="30" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_t3_text" value="Tier 3  Meta / Decision Agents" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="238" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_chr" value="" style="rounded=1;fillColor=#FFF176;strokeColor=#F9A825;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="270" width="30" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_chr_text" value="CHRONICLE (Memory Layer)" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="268" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_exec" value="" style="rounded=1;fillColor=#6A1B9A;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="300" width="30" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_exec_text" value="Execution Engine" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="298" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_human" value="" style="rounded=1;fillColor=#FF8F00;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="330" width="30" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_human_text" value="Human Escalation" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="328" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_audit" value="" style="rounded=1;fillColor=#37474F;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="360" width="30" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_audit_text" value="Audit (Immutable)" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="358" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Legend Edge Types -->
+        <mxCell id="leg_sep1" value="" style="line;html=1;strokeColor=#E0E0E0;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="395" width="240" height="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_edge_title" value="Edge Types:" style="text;html=1;align=left;fontSize=10;fontStyle=1;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="405" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_e_solid" value="" style="text;html=1;align=left;fontSize=10;fontColor=#455A64;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="425" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_e_solid_text" value="Primary flow (always)" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2200" y="425" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_e_dashed" value="     " style="text;html=1;align=left;fontSize=10;fontColor=#455A64;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="450" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_e_dashed_text" value="Conditional / contextual" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2200" y="450" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_e_red" value="" style="text;html=1;align=left;fontSize=10;fontColor=#C62828;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="475" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_e_red_text" value="Patient safety critical path" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2200" y="475" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_e_gold" value="     " style="text;html=1;align=left;fontSize=10;fontColor=#F9A825;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="500" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_e_gold_text" value="Memory / context injection" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2200" y="500" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Legend Shapes -->
+        <mxCell id="leg_sep2" value="" style="line;html=1;strokeColor=#E0E0E0;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="530" width="240" height="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_shape_title" value="Shape Types:" style="text;html=1;align=left;fontSize=10;fontStyle=1;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="540" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_hexagon" value="!" style="text;html=1;align=left;fontSize=14;fontColor=#455A64;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="560" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_hexagon_text" value="Router / Classifier node" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="560" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_rect" value="�" style="text;html=1;align=left;fontSize=14;fontColor=#1565C0;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="585" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_rect_text" value="Agent processing node" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="585" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg_diamond" value="�" style="text;html=1;align=left;fontSize=14;fontColor=#C62828;" vertex="1" parent="1">
+          <mxGeometry x="2120" y="610" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_diamond_text" value="Decision / routing gate" style="text;html=1;align=left;fontSize=10;fontColor=#212121;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="610" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             METRICS SIDEBAR
+             ============================================================ -->
+
+        <mxCell id="metrics_title" value="KEY SUCCESS METRICS" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;fontColor=#0D47A1;" vertex="1" parent="1">
+          <mxGeometry x="2100" y="680" width="280" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="metrics_box" value="PATIENT SAFETY (Non-Negotiable):&#xa;  Compromised batch dispensing: 0%&#xa;  Schedule H compliance: 100%&#xa;  CDSCO recall compliance: &lt; 2 hours&#xa;&#xa;OPERATIONAL EXCELLENCE:&#xa;  Cold chain MTTD: &lt; 5 minutes&#xa;  Forecast MAPE (top 200): &lt; 18%&#xa;  Epidemic lead time: &gt; 5 days&#xa;  Stockout rate: &lt; 2%&#xa;  Expiry write-off: &lt; 0.8%&#xa;  CRITIQUE challenge rate: 15-25%&#xa;&#xa;SYSTEM HEALTH:&#xa;  API latency (p95): &lt; 3 sec&#xa;  MCP availability: &gt; 99.5%&#xa;  Decision latency (critical): &lt; 5 min&#xa;  Confidence calibration error: &lt; 10%&#xa;&#xa;FINANCIAL:&#xa;  Net annual value: ~�30.5 Crore&#xa;  System cost: ~�2.24 Crore&#xa;  ROI: ~13.6x" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#90CAF9;fontSize=9;align=left;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="2100" y="720" width="280" height="340" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================
+             SYSTEM TITLE
+             ============================================================ -->
+
+        <mxCell id="system_title" value="PharmaIQ  Autonomous Health Retail Intelligence System" style="text;html=1;align=center;verticalAlign=middle;fontSize=22;fontStyle=1;fontColor=#0D47A1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="-50" width="800" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="system_subtitle" value="Eight-Agent Cognitive System with Adversarial Validation | LangGraph + Gemini API + 7 MCP Servers | 320 Stores" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=0;fontColor=#546E7A;" vertex="1" parent="1">
+          <mxGeometry x="350" y="-15" width="900" height="25" as="geometry" />
+        </mxCell>
+
+        <mxCell id="system_org" value="MedChain India | Designed by Thrive Together AI | v2.0.0" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontStyle=2;fontColor=#9E9E9E;" vertex="1" parent="1">
+          <mxGeometry x="500" y="5" width="600" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile> 

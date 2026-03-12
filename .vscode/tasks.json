@@ -1,0 +1,33 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Backend",
+			"type": "shell",
+			"command": "cd /home/labuser/Desktop/PharmaAI && source .venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 8000 --reload",
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Frontend",
+			"type": "shell",
+			"command": "cd /home/labuser/Desktop/PharmaAI/frontend && npm run dev -- --host 0.0.0.0 --port 5173",
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Frontend Dev",
+			"type": "shell",
+			"command": "cd /home/labuser/Desktop/PharmaAI/frontend && npm run dev -- --host 0.0.0.0",
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Backend",
+			"type": "shell",
+			"command": "cd /home/labuser/Desktop/PharmaAI && pkill -f 'uvicorn main:app' 2>/dev/null; sleep 2 && source .venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 8000 --reload",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}

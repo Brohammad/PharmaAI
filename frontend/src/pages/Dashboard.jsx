@@ -1,16 +1,17 @@
 import { useKPIs, useEvents, useWebSocket } from '../api/client'
+import { useAuth } from '../api/auth'
 import KpiCard from '../components/KpiCard'
 import LiveFeed from '../components/LiveFeed'
 import AgentBadge from '../components/AgentBadge'
 import SeverityBadge from '../components/SeverityBadge'
+import CycleRunner from '../components/CycleRunner'
 import { PageLoader, ErrorState } from '../components/LoadingSpinner'
 import {
   Store, AlertTriangle, Thermometer, TrendingUp, Users, Package,
-  Activity, Brain, Clock, CheckCircle2, XCircle, Zap,
+  Activity, Brain, Clock, CheckCircle2, XCircle, Zap, LogOut, Shield,
 } from 'lucide-react'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer,
-  LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Area, AreaChart,
 } from 'recharts'
 
 const AGENTS = ['SENTINEL', 'PULSE', 'AEGIS', 'MERIDIAN', 'CRITIQUE', 'COMPLIANCE', 'NEXUS', 'CHRONICLE']
@@ -44,7 +45,6 @@ function SystemHealthRing({ value, label, color }) {
 
 function AgentStatusStrip() {
   const { messages } = useWebSocket()
-  // Track which agents have recent activity (last 60s)
   const recentAgents = new Set(
     messages
       .filter((m) => m.type === 'agent_event' && m.data?.agent)
@@ -82,24 +82,25 @@ function AgentStatusStrip() {
 export default function Dashboard() {
   const { data: kpis, isLoading: kpiLoading, isError: kpiError, refetch: kpiRefetch } = useKPIs()
   const { data: eventsData, isLoading: eventsLoading } = useEvents(25)
+  const { user, logout } = useAuth()
 
   if (kpiError) return <ErrorState message="Could not reach backend" retry={kpiRefetch} />
 
   const events = eventsData?.events ?? []
 
   const kpiDefs = [
-    { key: 'stores_online',        label: 'Stores Online',         icon: Store,        color: 'emerald', unit: '',  trendKey: null },
-    { key: 'active_alerts',        label: 'Active Alerts',         icon: AlertTriangle, color: 'red',    unit: '',  trendKey: null },
-    { key: 'cold_chain_risk_pct',  label: 'Cold Chain Risk',       icon: Thermometer,  color: 'amber',  unit: '%', trendKey: null },
-    { key: 'schedule_h_compliance', label: 'Schedule H Compliance', icon: CheckCircle2, color: 'emerald', unit: '%', trendKey: null },
-    { key: 'demand_mape',          label: 'Demand MAPE',           icon: TrendingUp,   color: 'brand',  unit: '%', trendKey: null },
-    { key: 'active_escalations',   label: 'Escalations Pending',   icon: Brain,        color: 'purple', unit: '',  trendKey: null },
-    { key: 'pharmacist_coverage',  label: 'Pharmacist Coverage',   icon: Users,        color: 'cyan',   unit: '%', trendKey: null },
-    { key: 'expiry_risk_units',    label: 'Expiry Risk Items',     icon: Package,      color: 'amber',  unit: '',  trendKey: null },
-    { key: 'cycles_today',         label: 'Cycles Today',          icon: Zap,          color: 'brand',  unit: '',  trendKey: null },
-    { key: 'decisions_approved',   label: 'Decisions Approved',    icon: CheckCircle2, color: 'emerald', unit: '', trendKey: null },
-    { key: 'decisions_escalated',  label: 'Decisions Escalated',   icon: XCircle,      color: 'purple', unit: '',  trendKey: null },
-    { key: 'avg_cycle_time_s',     label: 'Avg Cycle Time',        icon: Clock,        color: 'cyan',   unit: 's', trendKey: null },
+    { key: 'stores_online',        label: 'Stores Online',         icon: Store,        color: 'emerald', unit: '' },
+    { key: 'active_alerts',        label: 'Active Alerts',         icon: AlertTriangle, color: 'red',    unit: '' },
+    { key: 'cold_chain_risk_pct',  label: 'Cold Chain Risk',       icon: Thermometer,  color: 'amber',  unit: '%' },
+    { key: 'schedule_h_compliance', label: 'Schedule H Compliance', icon: CheckCircle2, color: 'emerald', unit: '%' },
+    { key: 'demand_mape',          label: 'Demand MAPE',           icon: TrendingUp,   color: 'brand',  unit: '%' },
+    { key: 'active_escalations',   label: 'Escalations Pending',   icon: Brain,        color: 'purple', unit: '' },
+    { key: 'pharmacist_coverage',  label: 'Pharmacist Coverage',   icon: Users,        color: 'cyan',   unit: '%' },
+    { key: 'expiry_risk_units',    label: 'Expiry Risk Items',     icon: Package,      color: 'amber',  unit: '' },
+    { key: 'cycles_today',         label: 'Cycles Today',          icon: Zap,          color: 'brand',  unit: '' },
+    { key: 'decisions_approved',   label: 'Decisions Approved',    icon: CheckCircle2, color: 'emerald', unit: '' },
+    { key: 'decisions_escalated',  label: 'Decisions Escalated',   icon: XCircle,      color: 'purple', unit: '' },
+    { key: 'avg_cycle_time_s',     label: 'Avg Cycle Time',        icon: Clock,        color: 'cyan',   unit: 's' },
   ]
 
   return (
@@ -110,9 +111,25 @@ export default function Dashboard() {
           <h1 className="text-xl font-bold text-slate-100">Operations Dashboard</h1>
           <p className="text-sm text-slate-400 mt-0.5">MedChain India · 320 Pharmacies · Real-time intelligence</p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs font-medium text-emerald-300">System Nominal</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs font-medium text-emerald-300">System Nominal</span>
+          </div>
+          {user && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700">
+              <Shield size={12} className="text-brand-400" />
+              <span className="text-xs text-slate-300">{user.full_name}</span>
+              <span className="text-[10px] font-bold text-brand-400">{user.role}</span>
+              <button
+                onClick={logout}
+                className="ml-1 text-slate-500 hover:text-red-400 transition"
+                title="Sign out"
+              >
+                <LogOut size={11} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -149,14 +166,15 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Live Cycle Runner */}
+      <CycleRunner />
+
       {/* Live Feed + mini radar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Live feed — tall */}
         <div className="lg:col-span-2 h-[460px]">
           <LiveFeed initialEvents={eventsLoading ? [] : events} />
         </div>
 
-        {/* Agent activity radar */}
         <div className="card">
           <div className="card-header">
             <span className="font-semibold text-slate-200 text-sm">Agent Activity</span>
@@ -186,3 +204,4 @@ export default function Dashboard() {
     </div>
   )
 }
+
