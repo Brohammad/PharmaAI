@@ -1061,12 +1061,12 @@ async def db_get_kpi_summary(session: AsyncSession) -> dict:
     )
     latest_ts = latest_event_result.scalar()
 
-    # Cold chain alerts
+    # Cold chain alerts — non-NORMAL readings in last 24h
     cc_result = await session.execute(
         select(sqlfunc.count(ColdChainReading.reading_id))
         .where(
             ColdChainReading.status != "NORMAL",
-            ColdChainReading.recorded_at >= _ago(hours=1),
+            ColdChainReading.recorded_at >= _ago(hours=24),
         )
     )
     active_alerts = cc_result.scalar() or 0

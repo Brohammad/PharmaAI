@@ -507,7 +507,7 @@ async def api_cold_chain_alerts(db: AsyncSession = Depends(get_db)):
         sa_sel(ColdChainReading)
         .where(
             ColdChainReading.status != "NORMAL",
-            ColdChainReading.recorded_at >= __import__("datetime").datetime.now(__import__("datetime").timezone.utc) - __import__("datetime").timedelta(hours=6),
+            ColdChainReading.recorded_at >= datetime.now(timezone.utc) - timedelta(hours=24),
         )
         .order_by(ColdChainReading.recorded_at.desc())
         .limit(20)
