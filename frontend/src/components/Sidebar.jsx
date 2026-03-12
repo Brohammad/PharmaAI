@@ -1,16 +1,17 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Thermometer, TrendingUp, Users,
-  Package, Brain, Activity, ChevronRight, Zap,
+  Package, Brain, Activity, ChevronRight, Zap, Truck,
 } from 'lucide-react'
 
 const NAV = [
-  { to: '/',            icon: LayoutDashboard, label: 'Dashboard',    sub: 'Overview & KPIs' },
-  { to: '/cold-chain',  icon: Thermometer,     label: 'Cold Chain',   sub: 'SENTINEL' },
-  { to: '/demand',      icon: TrendingUp,      label: 'Demand Intel', sub: 'PULSE' },
-  { to: '/staffing',    icon: Users,           label: 'Staffing',     sub: 'AEGIS' },
-  { to: '/inventory',   icon: Package,         label: 'Inventory',    sub: 'MERIDIAN' },
-  { to: '/decisions',   icon: Brain,           label: 'Decisions',    sub: 'NEXUS' },
+  { to: '/',              icon: LayoutDashboard, label: 'Dashboard',    sub: 'Overview & KPIs' },
+  { to: '/cold-chain',    icon: Thermometer,     label: 'Cold Chain',   sub: 'SENTINEL' },
+  { to: '/demand',        icon: TrendingUp,      label: 'Demand Intel', sub: 'PULSE' },
+  { to: '/staffing',      icon: Users,           label: 'Staffing',     sub: 'AEGIS' },
+  { to: '/inventory',     icon: Package,         label: 'Inventory',    sub: 'MERIDIAN' },
+  { to: '/supply-chain',  icon: Truck,           label: 'Supply Chain', sub: 'Stock & Transfers' },
+  { to: '/decisions',     icon: Brain,           label: 'Decisions',    sub: 'NEXUS' },
 ]
 
 export default function Sidebar({ wsConnected }) {

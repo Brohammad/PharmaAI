@@ -27,6 +27,12 @@ export const fetchForecast      = (storeId = 'STORE_DEL_001') => api.get(`/deman
 export const fetchForecastChart = () => api.get('/demand/forecast-chart')
 export const fetchStaffing      = () => api.get('/staffing/overview')
 export const fetchExpiryRisks   = () => api.get('/inventory/expiry-risks')
+export const fetchStockLevels    = () => api.get('/supply-chain/stock-levels')
+export const fetchReorderAlerts  = () => api.get('/supply-chain/reorder-alerts')
+export const fetchTransferOrders = () => api.get('/supply-chain/transfers')
+export const fetchSupplyChain    = () => api.get('/supply-chain/summary')
+export const createTransfer      = (body) => api.post('/supply-chain/transfers', body)
+
 export const fetchDecisions     = (limit = 15) => api.get(`/decisions/recent?limit=${limit}`)
 export const fetchEscalations   = () => api.get('/decisions/escalations')
 export const approveEscalation  = (id) => api.post(`/decisions/escalations/${id}/approve`)
@@ -62,6 +68,30 @@ export const useStaffing = () =>
 
 export const useExpiryRisks = () =>
   useQuery({ queryKey: ['expiry-risks'], queryFn: fetchExpiryRisks, refetchInterval: 60_000 })
+
+export const useSupplyChain = () =>
+  useQuery({ queryKey: ['supply-chain'], queryFn: fetchSupplyChain, refetchInterval: 20_000 })
+
+export const useStockLevels = () =>
+  useQuery({ queryKey: ['stock-levels'], queryFn: fetchStockLevels, refetchInterval: 30_000 })
+
+export const useReorderAlerts = () =>
+  useQuery({ queryKey: ['reorder-alerts'], queryFn: fetchReorderAlerts, refetchInterval: 20_000 })
+
+export const useTransferOrders = () =>
+  useQuery({ queryKey: ['transfer-orders'], queryFn: fetchTransferOrders, refetchInterval: 15_000 })
+
+export const useCreateTransfer = () => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: createTransfer,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['transfer-orders'] })
+      qc.invalidateQueries({ queryKey: ['supply-chain'] })
+      qc.invalidateQueries({ queryKey: ['stock-levels'] })
+    },
+  })
+}
 
 export const useDecisions = (limit = 15) =>
   useQuery({ queryKey: ['decisions', limit], queryFn: () => fetchDecisions(limit), refetchInterval: 10_000 })

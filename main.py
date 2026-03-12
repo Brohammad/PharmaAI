@@ -76,6 +76,10 @@ from api.mock_data import (
     get_forecast_chart_data,
     get_staffing_overview,
     get_expiry_risks,
+    get_stock_levels,
+    get_reorder_alerts,
+    get_transfer_orders,
+    get_supply_chain_summary,
 )
 
 configure_logging()
@@ -540,6 +544,87 @@ async def api_staffing_overview():
 @app.get("/api/v1/inventory/expiry-risks", tags=["Inventory"])
 async def api_expiry_risks():
     return {"items": get_expiry_risks()}
+
+
+# ── Supply Chain & Stock ───────────────────────────────────────────────────────
+
+class TransferRequest(BaseModel):
+    sku_id:            str
+    drug_name:         str
+    source_store:      str
+    destination_store: str
+    quantity:          int
+    reason:            str | None = None
+
+@app.get("/api/v1/supply-chain/summary", tags=["Supply Chain"])
+async def api_supply_chain_summary():
+    return get_supply_chain_summary()
+
+@app.get("/api/v1/supply-chain/stock-levels", tags=["Supply Chain"])
+async def api_stock_levels():
+    return get_stock_levels()
+
+@app.get("/api/v1/supply-chain/reorder-alerts", tags=["Supply Chain"])
+async def api_reorder_alerts():
+    return {"alerts": get_reorder_alerts()}
+
+@app.get("/api/v1/supply-chain/transfers", tags=["Supply Chain"])
+async def api_transfer_orders():
+    return {"transfers": get_transfer_orders()}
+
+@app.post("/api/v1/supply-chain/transfers", tags=["Supply Chain"],
+          summary="Initiate a stock transfer (MANAGER+)")
+async def api_create_transfer(
+    body: TransferRequest,
+    db:   AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_role("MANAGER")),
+):
+    """
+    Create a new inter-store stock transfer order.
+    MERIDIAN-style: authority level is auto-assigned based on quantity thresholds.
+    """
+    transfer_id = f"TRF-{uuid.uuid4().hex[:8].upper()}"
+    authority   = "TIER_1" if body.quantity <= 100 else "TIER_2"
+
+    db.add(AuditLog(
+        log_id=str(uuid.uuid4()),
+        event_type="transfer_created",
+        actor=current_user["username"],
+        details=json.dumps({
+            "transfer_id":       transfer_id,
+            "sku_id":            body.sku_id,
+            "drug_name":         body.drug_name,
+            "source_store":      body.source_store,
+            "destination_store": body.destination_store,
+            "quantity":          body.quantity,
+            "authority_level":   authority,
+        }),
+        timestamp=datetime.now(timezone.utc),
+    ))
+    await db.commit()
+
+    record_agent_call("MERIDIAN")
+    logger.info("transfer_created",
+                transfer_id=transfer_id,
+                actor=current_user["username"],
+                sku=body.sku_id,
+                qty=body.quantity)
+
+    return {
+        "transfer_id":       transfer_id,
+        "status":            "PENDING_APPROVAL" if authority == "TIER_2" else "APPROVED",
+        "authority_level":   authority,
+        "sku_id":            body.sku_id,
+        "drug_name":         body.drug_name,
+        "source_store":      body.source_store,
+        "destination_store": body.destination_store,
+        "quantity":          body.quantity,
+        "reason":            body.reason,
+        "initiated_by":      current_user["username"],
+        "cold_chain_required": body.drug_name in ("Insulin Glargine", "Hepatitis B Vaccine"),
+        "created_at":        datetime.now(timezone.utc).isoformat(),
+        "message":           "Transfer order created. MERIDIAN will monitor execution.",
+    }
 
 
 # ── Decisions ──────────────────────────────────────────────────────────────────

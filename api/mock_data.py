@@ -372,3 +372,223 @@ def get_escalation_queue() -> list[dict[str, Any]]:
             "created_at":             _ago(minutes=28),
         },
     ]
+
+
+# ── Supply Chain — Stock Levels ───────────────────────────────────────────────
+
+_DRUGS = [
+    ("Paracetamol 650mg",    "SKU-1001", "OTC",        45,  200, 50),
+    ("ORS Sachets",          "SKU-1002", "OTC",        30,  150, 40),
+    ("Metformin 500mg",      "SKU-1004", "Schedule H", 60,  300, 80),
+    ("Insulin Glargine",     "SKU-1005", "Schedule H", 20,  80,  25),
+    ("Amoxicillin 500mg",    "SKU-1006", "Schedule H", 35,  160, 45),
+    ("Cetirizine 10mg",      "SKU-1007", "OTC",        25,  120, 30),
+    ("Azithromycin 500mg",   "SKU-1008", "Schedule H", 15,  70,  20),
+    ("Vitamin D3 60K",       "SKU-1009", "OTC",        50,  220, 60),
+    ("Amlodipine 5mg",       "SKU-1010", "Schedule H", 40,  180, 50),
+    ("Dengue NS1 Test Kit",  "SKU-1003", "Diagnostics", 10, 50,  15),
+    ("Oseltamivir 75mg",     "SKU-1011", "Schedule H", 8,   40,  12),
+    ("Insulin Regular",      "SKU-1012", "Schedule H", 18,  75,  22),
+]
+
+_ZONES = ["Delhi NCR", "Mumbai", "Bengaluru", "Chennai", "Hyderabad"]
+
+_ZONE_STORES: dict[str, list[str]] = {
+    "Delhi NCR":  [s for s in _STORE_IDS if "DEL" in s][:8],
+    "Mumbai":     [s for s in _STORE_IDS if "MUM" in s][:8],
+    "Bengaluru":  [s for s in _STORE_IDS if "BLR" in s][:8],
+    "Chennai":    [s for s in _STORE_IDS if "CHN" in s][:8],
+    "Hyderabad":  [s for s in _STORE_IDS if "HYD" in s][:8],
+}
+
+
+def _stock_status(qty: int, reorder: int, max_qty: int) -> str:
+    if qty == 0:
+        return "STOCKOUT"
+    pct = qty / max_qty
+    if qty <= reorder * 0.5:
+        return "CRITICAL"
+    if qty <= reorder:
+        return "LOW"
+    if pct >= 0.9:
+        return "OVERSTOCK"
+    return "NORMAL"
+
+
+def get_stock_levels() -> dict[str, Any]:
+    """Per-zone stock position for every tracked SKU."""
+    zone_data = []
+    total_skus = len(_DRUGS)
+    total_stockouts = 0
+    total_critical = 0
+    total_overstock = 0
+
+    for zone in _ZONES:
+        skus = []
+        for drug_name, sku_id, category, reorder, max_qty, _ in _DRUGS:
+            # Simulate zone-level aggregate stock (sum across zone stores)
+            n_stores = len(_ZONE_STORES.get(zone, [])) or 6
+            # Delhi: higher baseline due to epidemic surge
+            if zone == "Delhi NCR":
+                qty = random.randint(max(0, reorder - 10), int(max_qty * 0.6))
+            elif zone == "Mumbai":
+                qty = random.randint(int(max_qty * 0.3), int(max_qty * 0.85))
+            else:
+                qty = random.randint(int(max_qty * 0.2), max_qty)
+
+            status = _stock_status(qty, reorder, max_qty)
+            velocity = round(random.uniform(0.4, 4.8), 1)   # units/day
+            dos = round(qty / velocity, 1) if velocity > 0 else 999   # days of stock
+            skus.append({
+                "sku_id":        sku_id,
+                "drug_name":     drug_name,
+                "category":      category,
+                "quantity":      qty,
+                "reorder_point": reorder,
+                "max_quantity":  max_qty,
+                "status":        status,
+                "velocity":      velocity,
+                "days_of_stock": min(dos, 999),
+                "fill_rate":     round(qty / max_qty, 3),
+            })
+            if status == "STOCKOUT":
+                total_stockouts += 1
+            elif status == "CRITICAL":
+                total_critical += 1
+            elif status == "OVERSTOCK":
+                total_overstock += 1
+
+        zone_data.append({
+            "zone":            zone,
+            "stores":          len(_ZONE_STORES.get(zone, [])) or 6,
+            "skus":            skus,
+            "stockout_count":  sum(1 for s in skus if s["status"] == "STOCKOUT"),
+            "critical_count":  sum(1 for s in skus if s["status"] == "CRITICAL"),
+            "low_count":       sum(1 for s in skus if s["status"] == "LOW"),
+            "normal_count":    sum(1 for s in skus if s["status"] == "NORMAL"),
+            "overstock_count": sum(1 for s in skus if s["status"] == "OVERSTOCK"),
+        })
+
+    return {
+        "zones":            zone_data,
+        "total_skus":       total_skus,
+        "total_stockouts":  total_stockouts,
+        "total_critical":   total_critical,
+        "total_overstock":  total_overstock,
+        "last_updated":     _now(),
+    }
+
+
+def get_reorder_alerts() -> list[dict[str, Any]]:
+    """MERIDIAN-style reorder alerts across the network."""
+    alerts = []
+    urgent_skus = [d for d in _DRUGS if d[3] >= 15]   # reorder_point >= 15
+    for drug_name, sku_id, category, reorder, max_qty, lead_days in random.sample(urgent_skus, min(6, len(urgent_skus))):
+        qty = random.randint(0, reorder)
+        status = _stock_status(qty, reorder, max_qty)
+        if status in ("STOCKOUT", "CRITICAL", "LOW"):
+            suggested_qty = int((max_qty - qty) * random.uniform(0.6, 1.0))
+            cost_per_unit = round(random.uniform(5, 400), 2)
+            alerts.append({
+                "alert_id":           str(uuid.uuid4()),
+                "sku_id":             sku_id,
+                "drug_name":          drug_name,
+                "category":           category,
+                "zone":               random.choice(_ZONES),
+                "store_id":           random.choice(_STORE_IDS),
+                "current_stock":      qty,
+                "reorder_point":      reorder,
+                "suggested_order_qty": suggested_qty,
+                "estimated_cost":     round(suggested_qty * cost_per_unit, 0),
+                "lead_time_days":     lead_days,
+                "status":             status,
+                "priority":           "URGENT" if status in ("STOCKOUT", "CRITICAL") else "NORMAL",
+                "meridian_action":    "AUTO_REORDER" if suggested_qty * cost_per_unit < 200000 else "ESCALATE",
+                "created_at":         _ago(minutes=random.randint(5, 120)),
+            })
+    # Sort: STOCKOUT first, then CRITICAL, then LOW
+    order = {"STOCKOUT": 0, "CRITICAL": 1, "LOW": 2}
+    alerts.sort(key=lambda a: order.get(a["status"], 3))
+    return alerts
+
+
+# ── Supply Chain — Transfer Orders ────────────────────────────────────────────
+
+_TRANSFER_STATUSES = ["PENDING_APPROVAL", "APPROVED", "IN_TRANSIT", "DELIVERED", "CANCELLED"]
+
+_TRANSFER_TEMPLATES = [
+    ("Metformin 500mg",     "SKU-1004", "STORE_DEL_019", "STORE_DEL_004", 120, "Expiry risk at source — 45 days remaining"),
+    ("Paracetamol 650mg",   "SKU-1001", "STORE_MUM_003", "STORE_DEL_007", 200, "Dengue surge demand increase in Delhi"),
+    ("Insulin Glargine",    "SKU-1005", "STORE_BLR_002", "STORE_HYD_001", 60,  "Cold chain optimisation — balance network stock"),
+    ("ORS Sachets",         "SKU-1002", "STORE_CHN_005", "STORE_MUM_008", 300, "Pre-emptive buffer ahead of monsoon season"),
+    ("Cetirizine 10mg",     "SKU-1007", "STORE_DEL_012", "STORE_BLR_006", 80,  "Overstock at source — prevent expiry write-off"),
+    ("Amoxicillin 500mg",   "SKU-1006", "STORE_HYD_004", "STORE_MUM_002", 50,  "MERIDIAN: critical low at destination"),
+    ("Dengue NS1 Test Kit", "SKU-1003", "STORE_DEL_003", "STORE_MUM_007", 30,  "Epidemic signal: dengue cluster spreading west"),
+    ("Azithromycin 500mg",  "SKU-1008", "STORE_BLR_007", "STORE_CHN_003", 40,  "Demand rebalance — weekly brief recommendation"),
+]
+
+
+def get_transfer_orders() -> list[dict[str, Any]]:
+    orders = []
+    for i, (drug, sku, src, dst, qty, reason) in enumerate(_TRANSFER_TEMPLATES):
+        created = _ago(hours=random.randint(1, 72))
+        status_idx = min(i % len(_TRANSFER_STATUSES), len(_TRANSFER_STATUSES) - 1)
+        # Distribute statuses somewhat naturally
+        if i == 0:
+            status_val = "PENDING_APPROVAL"
+        elif i <= 2:
+            status_val = "APPROVED"
+        elif i <= 4:
+            status_val = "IN_TRANSIT"
+        elif i <= 6:
+            status_val = "DELIVERED"
+        else:
+            status_val = random.choice(["PENDING_APPROVAL", "IN_TRANSIT"])
+
+        eta_hours = random.randint(2, 48) if status_val in ("APPROVED", "IN_TRANSIT") else None
+        orders.append({
+            "transfer_id":        f"TRF-{str(uuid.uuid4()).upper()[:8]}",
+            "sku_id":             sku,
+            "drug_name":          drug,
+            "source_store":       src,
+            "destination_store":  dst,
+            "quantity":           qty,
+            "reason":             reason,
+            "status":             status_val,
+            "initiated_by":       random.choice(["MERIDIAN", "NEXUS", "PULSE"]),
+            "authority_level":    "TIER_1" if qty <= 100 else "TIER_2",
+            "critique_verdict":   random.choice(["VALIDATED", "VALIDATED", "CHALLENGED"]),
+            "compliance_verdict": "COMPLIANT",
+            "eta_hours":          eta_hours,
+            "distance_km":        random.randint(5, 1200),
+            "cold_chain_required": drug in ("Insulin Glargine", "Hepatitis B Vaccine"),
+            "created_at":         created,
+            "updated_at":         _ago(minutes=random.randint(5, 60)),
+        })
+    return orders
+
+
+def get_supply_chain_summary() -> dict[str, Any]:
+    """Network-wide supply chain health summary."""
+    transfers = get_transfer_orders()
+    reorders  = get_reorder_alerts()
+
+    in_transit  = [t for t in transfers if t["status"] == "IN_TRANSIT"]
+    pending     = [t for t in transfers if t["status"] == "PENDING_APPROVAL"]
+    delivered   = [t for t in transfers if t["status"] == "DELIVERED"]
+
+    return {
+        "network_fill_rate":          round(random.uniform(87.0, 96.0), 1),
+        "stockout_skus":              sum(1 for r in reorders if r["status"] == "STOCKOUT"),
+        "critical_skus":              sum(1 for r in reorders if r["status"] == "CRITICAL"),
+        "transfers_in_transit":       len(in_transit),
+        "transfers_pending_approval": len(pending),
+        "transfers_delivered_today":  len(delivered),
+        "pending_reorders":           len(reorders),
+        "auto_reorders_today":        random.randint(3, 12),
+        "escalated_reorders":         random.randint(0, 3),
+        "avg_transfer_time_h":        round(random.uniform(6.0, 18.0), 1),
+        "cold_chain_transfers":       sum(1 for t in in_transit if t.get("cold_chain_required")),
+        "last_updated":               _now(),
+    }
+
