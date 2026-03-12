@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { useDecisions, useEscalations, useApproveEscalation, useRejectEscalation } from '../api/client'
+import { useAuth } from '../api/auth'
 import AgentBadge from '../components/AgentBadge'
 import SeverityBadge from '../components/SeverityBadge'
 import { PageLoader, ErrorState } from '../components/LoadingSpinner'
-import { Brain, CheckCircle2, XCircle, Clock, Shield, AlertTriangle } from 'lucide-react'
+import { Brain, CheckCircle2, XCircle, Clock, Shield, AlertTriangle, Lock } from 'lucide-react'
 
 const AUTHORITY_COLORS = {
   TIER_1: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
@@ -21,7 +23,7 @@ function AuthorityBadge({ level }) {
   )
 }
 
-function EscalationCard({ item, onApprove, onReject, approving, rejecting }) {
+function EscalationCard({ item, onApprove, onReject, approving, rejecting, canAct, actionError }) {
   return (
     <div className="card p-5 border-l-4 border-l-purple-500 space-y-3 animate-slide-up">
       <div className="flex items-start justify-between gap-3">
@@ -57,42 +59,79 @@ function EscalationCard({ item, onApprove, onReject, approving, rejecting }) {
         </div>
       )}
 
-      {item.status === 'PENDING_HUMAN_APPROVAL' && (
-        <div className="flex gap-2 pt-1">
-          <button
-            onClick={() => onApprove(item.escalation_id)}
-            disabled={approving || rejecting}
-            className="btn-success flex-1 justify-center"
-          >
-            <CheckCircle2 size={14} />
-            {approving ? 'Approving…' : 'Approve'}
-          </button>
-          <button
-            onClick={() => onReject(item.escalation_id)}
-            disabled={approving || rejecting}
-            className="btn-danger flex-1 justify-center"
-          >
-            <XCircle size={14} />
-            {rejecting ? 'Rejecting…' : 'Reject'}
-          </button>
+      {/* Error feedback */}
+      {actionError && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
+          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#e2a0a0' }}>
+          <AlertTriangle size={12} />
+          {actionError}
         </div>
+      )}
+
+      {item.status === 'PENDING_HUMAN_APPROVAL' && (
+        canAct ? (
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={() => onApprove(item.escalation_id)}
+              disabled={approving || rejecting}
+              className="btn-success flex-1 justify-center"
+            >
+              <CheckCircle2 size={14} />
+              {approving ? 'Approving…' : 'Approve'}
+            </button>
+            <button
+              onClick={() => onReject(item.escalation_id)}
+              disabled={approving || rejecting}
+              className="btn-danger flex-1 justify-center"
+            >
+              <XCircle size={14} />
+              {rejecting ? 'Rejecting…' : 'Reject'}
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
+            style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', color: '#a893cc' }}>
+            <Lock size={12} />
+            Requires MANAGER or ADMIN role to approve / reject
+          </div>
+        )
       )}
     </div>
   )
 }
 
 export default function Decisions() {
+  const { user } = useAuth()
   const { data: decisionsData, isLoading: dLoading, isError: dError } = useDecisions(20)
   const { data: escalationsData, isLoading: eLoading } = useEscalations()
+  const [actionError, setActionError] = useState(null)
+
   const { mutate: approve, isPending: approving } = useApproveEscalation()
-  const { mutate: reject, isPending: rejecting } = useRejectEscalation()
+  const { mutate: reject,  isPending: rejecting  } = useRejectEscalation()
 
   if (dLoading) return <PageLoader />
   if (dError) return <ErrorState message="Decisions data unavailable" />
 
-  const decisions = decisionsData?.decisions ?? []
+  const decisions   = decisionsData?.decisions ?? []
   const escalations = escalationsData?.escalations ?? []
-  const pending = escalations.filter((e) => e.status === 'PENDING_HUMAN_APPROVAL')
+  const pending     = escalations.filter((e) => e.status === 'PENDING_HUMAN_APPROVAL')
+
+  const ROLE_RANK = { VIEWER: 0, PHARMACIST: 1, MANAGER: 2, ADMIN: 3 }
+  const canAct = ROLE_RANK[user?.role] >= ROLE_RANK['MANAGER']
+
+  function handleApprove(id) {
+    setActionError(null)
+    approve(id, {
+      onError: (err) => setActionError(err?.detail || err?.message || 'Approval failed. Check your permissions.'),
+    })
+  }
+
+  function handleReject(id) {
+    setActionError(null)
+    reject(id, {
+      onError: (err) => setActionError(err?.detail || err?.message || 'Rejection failed. Check your permissions.'),
+    })
+  }
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -123,10 +162,12 @@ export default function Decisions() {
               <EscalationCard
                 key={item.escalation_id}
                 item={item}
-                onApprove={(id) => approve(id)}
-                onReject={(id) => reject(id)}
+                onApprove={handleApprove}
+                onReject={handleReject}
                 approving={approving}
                 rejecting={rejecting}
+                canAct={canAct}
+                actionError={actionError}
               />
             ))}
           </div>

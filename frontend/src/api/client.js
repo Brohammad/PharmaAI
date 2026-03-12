@@ -103,7 +103,10 @@ export const useApproveEscalation = () => {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: approveEscalation,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['escalations'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['escalations'] })
+      qc.invalidateQueries({ queryKey: ['decisions'] })
+    },
   })
 }
 
@@ -111,7 +114,10 @@ export const useRejectEscalation = () => {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: rejectEscalation,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['escalations'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['escalations'] })
+      qc.invalidateQueries({ queryKey: ['decisions'] })
+    },
   })
 }
 
