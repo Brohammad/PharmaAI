@@ -24,6 +24,7 @@ python-multipart>=0.0.9
 
 # ── Observability ─────────────────────────────────────────────────────────
 prometheus-client>=0.20.0
+langsmith>=0.1.0
 
 # ── Rate limiting ─────────────────────────────────────────────────────────
 slowapi>=0.1.9

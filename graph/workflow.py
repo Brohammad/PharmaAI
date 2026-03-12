@@ -138,9 +138,13 @@ def get_compiled_graph():
     """
     Returns the compiled LangGraph runnable.
     Cache this at application startup — do not rebuild per request.
+
+    When LANGCHAIN_TRACING_V2=true is set in the environment (populated by
+    gemini_client module on import), LangGraph automatically submits full
+    graph traces — node execution, state transitions, and timing — to LangSmith.
     """
     builder = build_pharmaiq_graph()
-    return builder.compile()
+    return builder.compile(name="PharmaIQ")
 
 
 # ── Module-level compiled graph ────────────────────────────────────────────────

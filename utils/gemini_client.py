@@ -7,6 +7,8 @@ Model assignment:
   Tier 3 synthesis   (NEXUS, CHRONICLE)                  → gemini-3.1-pro-preview
 
 All clients share one configured google.genai.Client instance (singleton).
+LangSmith tracing is applied via @traceable — every LLM call appears as a
+child run inside the parent LangGraph trace in the LangSmith UI.
 """
 
 from __future__ import annotations
@@ -14,8 +16,18 @@ from __future__ import annotations
 import os
 from google import genai
 from google.genai import types
+from langsmith import traceable
 
 from config.settings import settings
+
+# ── Bootstrap LangSmith env vars from settings ─────────────────────────────────
+# LangGraph + LangSmith read these directly from os.environ.
+# We push them early so any import of this module activates tracing.
+if settings.langchain_tracing_v2 and settings.langchain_api_key:
+    os.environ.setdefault("LANGCHAIN_TRACING_V2", "true")
+    os.environ.setdefault("LANGCHAIN_API_KEY", settings.langchain_api_key)
+    os.environ.setdefault("LANGCHAIN_PROJECT", settings.langchain_project)
+    os.environ.setdefault("LANGCHAIN_ENDPOINT", settings.langchain_endpoint)
 
 # ── Singleton client ───────────────────────────────────────────────────────────
 _client: genai.Client | None = None
@@ -40,16 +52,22 @@ def make_generation_config(
     )
 
 
+@traceable(run_type="llm", name="gemini_generate")
 async def generate(
     model: str,
     system_prompt: str,
     user_prompt: str,
     temperature: float | None = None,
     max_output_tokens: int | None = None,
+    *,
+    agent_name: str = "unknown",
 ) -> str:
     """
     Async wrapper around the google-genai generate_content call.
     Returns the text of the first response candidate.
+
+    The @traceable decorator sends every call to LangSmith as a child run,
+    capturing: model, agent_name, system_prompt, user_prompt, and the response.
     """
     client = get_client()
     config = make_generation_config(temperature, max_output_tokens)

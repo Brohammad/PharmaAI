@@ -87,5 +87,11 @@ class Settings(BaseSettings):
     api_port: int = Field(8000, alias="API_PORT")
     api_reload: bool = Field(False, alias="API_RELOAD")
 
+    # ── LangSmith Observability ────────────────────────────────────────────────
+    langchain_tracing_v2: bool = Field(False, alias="LANGCHAIN_TRACING_V2")
+    langchain_api_key: str = Field("", alias="LANGCHAIN_API_KEY")
+    langchain_project: str = Field("PharmaIQ", alias="LANGCHAIN_PROJECT")
+    langchain_endpoint: str = Field("https://api.smith.langchain.com", alias="LANGCHAIN_ENDPOINT")
+
 
 settings = Settings()

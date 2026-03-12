@@ -413,7 +413,7 @@ async def stream_cycle(
         t0 = time.perf_counter()
         try:
             state = PharmaIQState(**initial_state)
-            async for chunk in graph.astream(state):
+            async for chunk in graph.astream(state, config={"run_name": f"SSE/{run_id}"}):
                 node_name = list(chunk.keys())[0] if chunk else "unknown"
                 agent_name = (
                     node_name.upper()
@@ -724,7 +724,7 @@ async def _run_graph(run_id: str, initial_state: dict[str, Any]) -> None:
     try:
         logger.info("graph_run_start", run_id=run_id)
         state = PharmaIQState(**initial_state)
-        final = await graph.ainvoke(state)
+        final = await graph.ainvoke(state, config={"run_name": f"Scheduled/{run_id}"})
         duration = time.perf_counter() - t0
         CYCLE_DURATION.observe(duration)
         logger.info("graph_run_complete", run_id=run_id,
@@ -736,7 +736,7 @@ async def _run_graph(run_id: str, initial_state: dict[str, Any]) -> None:
 
 async def _run_graph_sync(initial_state: dict[str, Any]) -> PharmaIQState:
     state = PharmaIQState(**initial_state)
-    return await graph.ainvoke(state)
+    return await graph.ainvoke(state, config={"run_name": f"API/{uuid.uuid4()}"})
 
 
 async def _run_scheduled_cycle(cycle_type_str: str) -> None:
