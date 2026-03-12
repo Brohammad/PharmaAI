@@ -23,9 +23,19 @@ function ProtectedRoute({ children }) {
 function AppShell() {
   const { connected } = useWebSocket()
   return (
-    <div className="flex h-screen bg-slate-950 overflow-hidden">
+    <div
+      className="flex h-screen overflow-hidden"
+      style={{ background: '#070d1a' }}
+    >
+      {/* Persistent mesh gradient wash */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(at 20% 10%, rgba(14,126,246,0.07) 0, transparent 50%), radial-gradient(at 80% 80%, rgba(168,85,247,0.05) 0, transparent 50%)',
+        }}
+      />
       <Sidebar wsConnected={connected} />
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto relative">
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/"             element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
