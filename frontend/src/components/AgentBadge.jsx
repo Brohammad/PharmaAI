@@ -1,14 +1,14 @@
-// Distinct, non-clashing palette for each agent — inline styles for glass compatibility
+// Muted per-agent palette — distinct hues, low saturation, comfortable on dark glass
 const AGENT = {
-  SENTINEL:   { bg: 'rgba(34,211,238,0.10)',  color: '#67e8f9', border: 'rgba(34,211,238,0.25)',  dot: '#22d3ee' },
-  PULSE:      { bg: 'rgba(41,156,255,0.10)',  color: '#7dd3fc', border: 'rgba(41,156,255,0.25)',  dot: '#38bdf8' },
-  AEGIS:      { bg: 'rgba(167,139,250,0.10)', color: '#c4b5fd', border: 'rgba(167,139,250,0.25)', dot: '#a78bfa' },
-  MERIDIAN:   { bg: 'rgba(251,191,36,0.10)',  color: '#fcd34d', border: 'rgba(251,191,36,0.25)',  dot: '#fbbf24' },
-  CRITIQUE:   { bg: 'rgba(249,115,22,0.10)',  color: '#fdba74', border: 'rgba(249,115,22,0.25)',  dot: '#fb923c' },
-  COMPLIANCE: { bg: 'rgba(52,211,153,0.10)',  color: '#6ee7b7', border: 'rgba(52,211,153,0.25)',  dot: '#34d399' },
-  NEXUS:      { bg: 'rgba(192,132,252,0.10)', color: '#e9d5ff', border: 'rgba(192,132,252,0.25)', dot: '#c084fc' },
-  CHRONICLE:  { bg: 'rgba(148,163,184,0.08)', color: '#cbd5e1', border: 'rgba(148,163,184,0.2)',  dot: '#94a3b8' },
-  EXECUTION:  { bg: 'rgba(41,156,255,0.08)',  color: '#93c5fd', border: 'rgba(41,156,255,0.2)',   dot: '#60a5fa' },
+  SENTINEL:   { bg: 'rgba(6,182,212,0.07)',   color: '#6eaeba',  border: 'rgba(6,182,212,0.18)',   dot: '#0891b2' },
+  PULSE:      { bg: 'rgba(41,156,255,0.07)',  color: '#7499b8',  border: 'rgba(41,156,255,0.18)',  dot: '#2563eb' },
+  AEGIS:      { bg: 'rgba(139,92,246,0.07)',  color: '#9d88bc',  border: 'rgba(139,92,246,0.18)',  dot: '#7c3aed' },
+  MERIDIAN:   { bg: 'rgba(234,179,8,0.07)',   color: '#b8a050',  border: 'rgba(234,179,8,0.18)',   dot: '#a16207' },
+  CRITIQUE:   { bg: 'rgba(249,115,22,0.07)',  color: '#c49070',  border: 'rgba(249,115,22,0.18)',  dot: '#c2410c' },
+  COMPLIANCE: { bg: 'rgba(34,197,94,0.07)',   color: '#74a882',  border: 'rgba(34,197,94,0.18)',   dot: '#15803d' },
+  NEXUS:      { bg: 'rgba(168,85,247,0.07)',  color: '#a888bf',  border: 'rgba(168,85,247,0.18)',  dot: '#9333ea' },
+  CHRONICLE:  { bg: 'rgba(100,116,139,0.07)', color: '#6b7f96',  border: 'rgba(100,116,139,0.18)', dot: '#475569' },
+  EXECUTION:  { bg: 'rgba(41,156,255,0.06)',  color: '#6e8eaa',  border: 'rgba(41,156,255,0.16)',  dot: '#1d4ed8' },
 }
 
 export default function AgentBadge({ agent, showDot = true, size = 'sm' }) {
